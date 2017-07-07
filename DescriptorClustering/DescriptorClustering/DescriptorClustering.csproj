@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E61345D4-548C-4675-871B-F0269EEB7632}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{1A4848F3-5A23-425B-9DBD-0B42403D6234}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DescriptorClusteringCLI</RootNamespace>
+    <RootNamespace>DescriptorClustering</RootNamespace>
     <AssemblyName>DescriptorClustering</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +20,6 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>..\bin\x64\Release\</OutputPath>
@@ -31,7 +29,6 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -44,18 +41,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FeatureReader.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Clustering\ClusteringBase.cs" />
+    <Compile Include="Clustering\Hierarchical\ClusteringDivisiveBase.cs" />
+    <Compile Include="Clustering\Hierarchical\ClusteringHierarchicalBase.cs" />
+    <Compile Include="Clustering\Simple\ClusteringSimple.cs" />
+    <Compile Include="Clustering\Simple\ClusteringSimpleBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DescriptorClustering\DescriptorClustering.csproj">
-      <Project>{1A4848F3-5A23-425B-9DBD-0B42403D6234}</Project>
-      <Name>DescriptorClustering</Name>
-    </ProjectReference>
+    <Compile Include="Structures\Centroid.cs" />
+    <Compile Include="Structures\Descriptor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

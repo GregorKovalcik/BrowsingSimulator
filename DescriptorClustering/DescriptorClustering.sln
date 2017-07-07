@@ -5,6 +5,12 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DescriptorClusteringCLI", "DescriptorClusteringCLI\DescriptorClusteringCLI.csproj", "{E61345D4-548C-4675-871B-F0269EEB7632}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DescriptorClustering", "DescriptorClustering\DescriptorClustering.csproj", "{1A4848F3-5A23-425B-9DBD-0B42403D6234}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClustering", "TestClustering\TestClustering.csproj", "{F89570CC-64DD-4E12-A879-342A2890DBCA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmallDataTestAndVisualization", "SmallDataTestAndVisualization\SmallDataTestAndVisualization.csproj", "{3E6EE705-AB52-40FF-9977-B1BF8A63569B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -15,6 +21,18 @@ Global
 		{E61345D4-548C-4675-871B-F0269EEB7632}.Debug|x64.Build.0 = Debug|x64
 		{E61345D4-548C-4675-871B-F0269EEB7632}.Release|x64.ActiveCfg = Release|x64
 		{E61345D4-548C-4675-871B-F0269EEB7632}.Release|x64.Build.0 = Release|x64
+		{1A4848F3-5A23-425B-9DBD-0B42403D6234}.Debug|x64.ActiveCfg = Debug|x64
+		{1A4848F3-5A23-425B-9DBD-0B42403D6234}.Debug|x64.Build.0 = Debug|x64
+		{1A4848F3-5A23-425B-9DBD-0B42403D6234}.Release|x64.ActiveCfg = Release|x64
+		{1A4848F3-5A23-425B-9DBD-0B42403D6234}.Release|x64.Build.0 = Release|x64
+		{F89570CC-64DD-4E12-A879-342A2890DBCA}.Debug|x64.ActiveCfg = Debug|x64
+		{F89570CC-64DD-4E12-A879-342A2890DBCA}.Debug|x64.Build.0 = Debug|x64
+		{F89570CC-64DD-4E12-A879-342A2890DBCA}.Release|x64.ActiveCfg = Release|x64
+		{F89570CC-64DD-4E12-A879-342A2890DBCA}.Release|x64.Build.0 = Release|x64
+		{3E6EE705-AB52-40FF-9977-B1BF8A63569B}.Debug|x64.ActiveCfg = Debug|x64
+		{3E6EE705-AB52-40FF-9977-B1BF8A63569B}.Debug|x64.Build.0 = Debug|x64
+		{3E6EE705-AB52-40FF-9977-B1BF8A63569B}.Release|x64.ActiveCfg = Release|x64
+		{3E6EE705-AB52-40FF-9977-B1BF8A63569B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
