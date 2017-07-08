@@ -8,12 +8,13 @@ namespace DescriptorClustering.Hierarchical
 {
     public abstract class ClusteringHierarchicalBase : ClusteringBase
     {
-        public Centroid[][] Centroids { get; private set; }
+        // Hierarchical clusterization produces multiple layers, so we need to have array of array of centroids
+        public Centroid[][] Centroids { get; protected set; }
 
         public ClusteringHierarchicalBase(Descriptor[] descriptors) : base(descriptors)
         {
         }
 
-        public abstract Centroid[][] Clusterize(double[] seedPercentages, int iterationCount);
+        public abstract double[][] Clusterize(int[] layerSeedCounts, int[] iterationCounts, int randomSeed);
     }
 }

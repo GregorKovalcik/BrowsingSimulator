@@ -22,10 +22,6 @@ namespace DescriptorClusteringCLI
             string descriptorFile = args[0];
             string outputFile = args[1];
             double seedPercentage = double.Parse(args[2]);
-            //DescriptorKMeans kMeans = new DescriptorKMeans(LoadDescriptors(descriptorFile), seedPercentage);
-            //DescriptorKMeans kMeans = new DescriptorKMeansGPU(LoadArrayDescriptors(descriptorFile), seedPercentage,
-            //    DescriptorKMeansGPU.L2SQR_I, 1);
-            //kMeans.Run(10);
 
             int seed = 5334;
             int windowSize = 720;

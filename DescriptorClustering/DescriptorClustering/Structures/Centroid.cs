@@ -8,7 +8,7 @@ namespace DescriptorClustering
 {
     public class Centroid
     {
-        public int Id { get; private set; }
+        public int Id { get; set; }
         public Descriptor Mean { get; private set; }
         public List<Descriptor> Descriptors { get; private set; }
         private object lockObject = new object();

@@ -3,16 +3,24 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DescriptorClustering;
 using DescriptorClustering.Simple;
 using System.Diagnostics;
+using DescriptorClustering.Hierarchical.Divisive;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace TestClustering
 {
     [TestClass]
     public class TestClustering
     {
-        int seed = 5334;
-        int windowSize = 720;
-        Descriptor[] descriptors = HelperTestClass.GenerateHierarchicalDescriptors(5, 100, 2);
+        static int seed = 5334;
+        static int windowSize = 720;
+        static int nDescriptors = 10000;
+        static int descriptorDimension = 2;
+        static int nClusters = 100;
+        static int iterationCount = 10;
 
+        static int nDescriptorsDiv5 = nDescriptors / 5;
+        static Descriptor[] descriptors = HelperTestClass.GenerateHierarchicalDescriptors(seed, nDescriptorsDiv5, descriptorDimension);
 
         public void TestClusteringSimple(ClusteringSimpleBase clustering)
         {
@@ -98,8 +106,119 @@ namespace TestClustering
             HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids, windowSize, windowSize);
         }
 
+        [TestMethod]
+        public void HugeDivisiveCPU()
+        {
+            int nDescriptors = 350000;
+            int descriptorDimension = 4096;
+            int[] nClusters = new int[] { 150, 150 };
+            int[] iterationCounts = new int[] { 10, 10 };
+
+            int nDescriptorsDiv5 = nDescriptors / 5;
+
+            Descriptor[] descriptors = HelperTestClass.GenerateHierarchicalDescriptors(seed, nDescriptorsDiv5, descriptorDimension);
+            ClusteringDivisive clustering = new ClusteringDivisive(descriptors);
+
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+            clustering.Clusterize(nClusters, iterationCounts, seed);
+            stopWatch.Stop();
+
+            double elapsedSeconds = (stopWatch.ElapsedMilliseconds * 0.001);
+            double nPerSecond = nDescriptorsDiv5 * 5 * nClusters[0] * nClusters[1] / elapsedSeconds;
+            Console.WriteLine("Computing time: " + elapsedSeconds + " seconds (" + nPerSecond + " per second).");
+
+            HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids, windowSize, windowSize);
+        }
+
+
+        [TestMethod]
+        public void VisualizeHeuristicDivisive2Layer()
+        {
+            int[] seedCounts = new int[] { 10, 100 };
+            int[] iterationCounts = new int[] { 10, 10 };
+
+            ClusteringDivisive clustering = new ClusteringDivisive(descriptors);
+
+            clustering.Clusterize(seedCounts, iterationCounts, seed);
+            HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids, windowSize, windowSize);
+        }
+
+        [TestMethod]
+        public void VisualizeHeuristicDivisive2LayerB()
+        {
+            int[] seedCounts = new int[] { 100, 10 };
+            int[] iterationCounts = new int[] { 10, 10 };
+
+            ClusteringDivisive clustering = new ClusteringDivisive(descriptors);
+
+            clustering.Clusterize(seedCounts, iterationCounts, seed);
+            HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids, windowSize, windowSize);
+        }
+
+
+        [TestMethod]
+        public void VisualizeHeuristicDivisive3Layer()
+        {
+            int[] seedCounts = new int[] { 10, 10, 10 };
+            int[] iterationCounts = new int[] { 10, 10, 10 };
+
+            ClusteringDivisive clustering = new ClusteringDivisive(descriptors);
+
+            clustering.Clusterize(seedCounts, iterationCounts, seed);
+            HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids, windowSize, windowSize);
+        }
+
+        public void TestDescriptorAssignment(int nDescriptors, Centroid[] centroids)
+        {
+            bool[] isAssigned = Enumerable.Repeat(false, nDescriptors).ToArray();
+
+            // catch duplicate assignments
+            foreach (Centroid centroid in centroids)
+            {
+                foreach (Descriptor descriptor in centroid.Descriptors)
+                {
+                    Assert.IsFalse(isAssigned[descriptor.Id], "Duplicate assignment detected!");
+                    isAssigned[descriptor.Id] = true;
+                }
+            }
+
+            // catch not assigned
+            foreach (bool assignment in isAssigned)
+            {
+                Assert.IsTrue(assignment, "Descriptor without assignment detected!");
+            }
+
+            // catch duplicate centroids
+            HashSet<int> hashSet = new HashSet<int>();
+            foreach (Centroid centroid in centroids)
+            {
+                Assert.IsTrue(!hashSet.Contains(centroid.Mean.Id));
+                hashSet.Add(centroid.Mean.Id);
+            }
+        }
+
+
+        [TestMethod]
+        public void TestDescriptorAssignmentSimple()
+        {
+            ClusteringSimple clustering = new ClusteringSimple(descriptors);
+            clustering.Clusterize(nClusters, iterationCount, seed);
+            TestDescriptorAssignment(descriptors.Length, clustering.Centroids);
+        }
+
+        [TestMethod]
+        public void TestDescriptorAssignmentDivisive()
+        {
+            int[] nClusters = new int[] { 10, 10 };
+            int[] iterationCounts = new int[] { 10, 10 };
+            
+            ClusteringDivisive clustering = new ClusteringDivisive(descriptors);
+            clustering.Clusterize(nClusters, iterationCounts, seed);
+            TestDescriptorAssignment(descriptors.Length, clustering.Centroids[clustering.Centroids.Length - 1]);
+        }
+
         
-
-
+        
     }
 }

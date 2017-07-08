@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DescriptorClustering.Clustering.Simple
+namespace DescriptorClustering.Simple
 {
     class ClusteringSimpleGPU : ClusteringSimpleBase
     {

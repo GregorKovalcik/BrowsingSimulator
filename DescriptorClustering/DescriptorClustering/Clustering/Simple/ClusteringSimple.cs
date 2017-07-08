@@ -35,7 +35,7 @@ namespace DescriptorClustering.Simple
                 Centroid closestCentroid = null;
                 foreach (Centroid centroid in Centroids)
                 {
-                    double distance = Descriptor.GetDistance(centroid.Mean.Values, descriptor.Values);  // TODO: change to Func<>
+                    double distance = Descriptor.GetDistanceSQR(centroid.Mean.Values, descriptor.Values);  // TODO: change to Func<>
                     if (distance < smallestDistance)
                     {
                         smallestDistance = distance;
@@ -71,7 +71,7 @@ namespace DescriptorClustering.Simple
 
                 if (newMean != null && oldMean != null)
                 {
-                    updatedCentroidDeltas[index] = Descriptor.GetDistance(oldMean.Values, newMean.Values);
+                    updatedCentroidDeltas[index] = Descriptor.GetDistanceSQR(oldMean.Values, newMean.Values);
                 }
                 else
                 {
@@ -149,7 +149,7 @@ namespace DescriptorClustering.Simple
                 Descriptor closestDescriptor = null;
                 foreach (Descriptor descriptor in Descriptors)
                 {
-                    double distance = Descriptor.GetDistance(centroid.Mean.Values, descriptor.Values);  // TODO: change to Func<>
+                    double distance = Descriptor.GetDistanceSQR(centroid.Mean.Values, descriptor.Values);  // TODO: change to Func<>
                     if (distance < smallestDistance)
                     {
                         smallestDistance = distance;
