@@ -13,12 +13,22 @@ namespace SmallDataTestAndVisualization
     {
         static void Main(string[] args)
         {
-            Descriptor[] descriptors = HelperTestClass.GenerateHierarchicalDescriptors(5, 5000, 2);
+            int seed = 5334;
+            int windowSize = 720;
+
+            int nDescriptors = 350000;
+            int descriptorDiension = 4096;
+            int nClusters = 25;// 128;
+            int iterationCount = 10;
+
+            int nDescriptorsDiv5 = nDescriptors / 5;
+
+            Descriptor[] descriptors = HelperTestClass.GenerateHierarchicalDescriptors(seed, nDescriptorsDiv5, descriptorDiension);
             ClusteringSimple clustering = new ClusteringSimple(descriptors);
 
-            clustering.Clusterize(0.1, 10, 5334);
+            clustering.Clusterize(nClusters, iterationCount, seed);
 
-            HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids, 720, 720);
+            HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids, windowSize, windowSize);
         }
     }
 }

@@ -11,6 +11,7 @@ namespace DescriptorClustering
         public int Id { get; private set; }
         public Descriptor Mean { get; private set; }
         public List<Descriptor> Descriptors { get; private set; }
+        private object lockObject = new object();
 
         public Centroid()
         {
@@ -24,6 +25,14 @@ namespace DescriptorClustering
             Id = id;
             Mean = seed;
             Descriptors = new List<Descriptor>();
+        }
+
+        public void AddDescriptorConcurrent(Descriptor descriptor)
+        {
+            lock (lockObject)
+            {
+                Descriptors.Add(descriptor);
+            }
         }
 
         public void ClearDescriptors()

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define VERBOSE
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,29 +34,35 @@ namespace DescriptorClustering.Simple
         {
             Centroids = GenerateRandomSeeds(seedCount, randomSeed);
 
-            #if DEBUG
+#if VERBOSE
             Console.WriteLine("Running {0} iterations:", iterationCount);
 #endif
 
             double[] updateDeltas = new double[iterationCount];
             for (int i = 0; i < iterationCount; i++)
             {
-                #if DEBUG
+#if VERBOSE
                 Console.WriteLine("Iteration {0}, assign phase.", i);
-                #endif
+#endif
 
                 Assign();
-                
-                #if DEBUG
+
+#if VERBOSE
                 Console.WriteLine("Iteration {0}, update phase.", i);
-                #endif
+#endif
 
                 updateDeltas[i] = Update();
+
+                int droppedCount = DropEmptyCentroids();
+#if VERBOSE
+                Console.WriteLine("Iteration {0}, dropping phase: {1} dropped.", i, droppedCount);
+#endif
+
                 // LogProgress(id, i + 1, imageFilelist.Count, stopwatch, ref lastMiliseconds);
-            }            
-            #if DEBUG
+            }
+#if VERBOSE
             Console.WriteLine("Iterating finished. Asigning the closest descriptors.");
-            #endif
+#endif
 
             AssignClosestDescriptors();
 
@@ -64,6 +72,8 @@ namespace DescriptorClustering.Simple
         protected abstract void Assign();
 
         protected abstract double Update();
+
+        protected abstract int DropEmptyCentroids();
 
         protected abstract void AssignClosestDescriptors();
     }

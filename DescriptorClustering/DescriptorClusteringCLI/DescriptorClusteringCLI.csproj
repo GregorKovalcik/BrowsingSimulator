@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DescriptorClusteringCLI</RootNamespace>
-    <AssemblyName>DescriptorClustering</AssemblyName>
+    <AssemblyName>DescriptorClusteringCLI</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -55,6 +55,10 @@
     <ProjectReference Include="..\DescriptorClustering\DescriptorClustering.csproj">
       <Project>{1A4848F3-5A23-425B-9DBD-0B42403D6234}</Project>
       <Name>DescriptorClustering</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TestClustering\TestClustering.csproj">
+      <Project>{F89570CC-64DD-4E12-A879-342A2890DBCA}</Project>
+      <Name>TestClustering</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -16,6 +16,8 @@ namespace TestClustering
             int nDescriptors = nDescriptorsMultiplier * 5;
             Descriptor[] descriptors = new Descriptor[nDescriptors];
             Random random = new Random(seed);
+
+            Console.WriteLine("Generating {0} descriptors ({1} dimensions).", nDescriptors, dimension);
             for (int i = 0; i < nDescriptors; i += 5)
             {
                 descriptors[i] = new Descriptor(i, GetRandomVector(random, dimension, 1));
