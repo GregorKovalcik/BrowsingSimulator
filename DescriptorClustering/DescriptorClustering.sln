@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmallDataTestAndVisualizati
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DescriptorClusteringHeuristicCLI", "DescriptorClusteringHeuristicCLI\DescriptorClusteringHeuristicCLI.csproj", "{34E53376-B44B-4FDE-84A9-A06482B8AAE0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClusteringBrowserApp", "ClusteringBrowserApp\ClusteringBrowserApp.csproj", "{8D3F2CFB-7993-4486-9F38-200EB27F4FA5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -39,6 +41,10 @@ Global
 		{34E53376-B44B-4FDE-84A9-A06482B8AAE0}.Debug|x64.Build.0 = Debug|x64
 		{34E53376-B44B-4FDE-84A9-A06482B8AAE0}.Release|x64.ActiveCfg = Release|x64
 		{34E53376-B44B-4FDE-84A9-A06482B8AAE0}.Release|x64.Build.0 = Release|x64
+		{8D3F2CFB-7993-4486-9F38-200EB27F4FA5}.Debug|x64.ActiveCfg = Debug|x64
+		{8D3F2CFB-7993-4486-9F38-200EB27F4FA5}.Debug|x64.Build.0 = Debug|x64
+		{8D3F2CFB-7993-4486-9F38-200EB27F4FA5}.Release|x64.ActiveCfg = Release|x64
+		{8D3F2CFB-7993-4486-9F38-200EB27F4FA5}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
