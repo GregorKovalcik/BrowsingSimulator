@@ -18,21 +18,21 @@ namespace DescriptorClusteringCLI
             string outputFile = args[2];
             
             int argumentOffset = 3;
-            int[] layersToExport = new int[args.Length - argumentOffset];
+            List<int> layersToExport = new List<int>();
             for (int i = argumentOffset; i < args.Length; i++)
             {
-                layersToExport[i - argumentOffset] = int.Parse(args[i]); // TODO: try-catch
+                layersToExport.Add(int.Parse(args[i]) - 1); // TODO: try-catch
             }
             
             ClusteringAgglomerative clustering = new ClusteringAgglomerative(LoadArrayDescriptors(descriptorFile, clusteringFile));
-            clustering.Clusterize();
+            clustering.Clusterize(layersToExport);
 
-            foreach (int layerId in layersToExport)
+            foreach (Centroid[] layerCentroids in clustering.Centroids)
             {
-                Centroid[] centroids = clustering.Centroids[layerId];
-                string filename = Path.GetFileNameWithoutExtension(outputFile) + "_" + layerId + "." +Path.GetExtension(outputFile);
+                string filename = Path.GetFileNameWithoutExtension(outputFile) + "_" + layerCentroids.Length 
+                    + "." + Path.GetExtension(outputFile);
 
-                WriteToTextFile(centroids, filename);
+                WriteToTextFile(layerCentroids, filename);
             }
         }
 

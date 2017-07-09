@@ -33,14 +33,21 @@ namespace DescriptorClustering.Hierarchical.Agglomerative
 
         public virtual double[] Clusterize()
         {
-            return Clusterize(int.MaxValue);
+            return Clusterize(int.MaxValue, new List<int>(Enumerable.Range(0, Descriptors.Length - 1)));
         }
 
-        public virtual double[] Clusterize(int maxIterations)
+        public virtual double[] Clusterize(List<int> layersToExport)
+        {
+            return Clusterize(int.MaxValue, layersToExport);
+        }
+
+
+        public virtual double[] Clusterize(int maxIterations, List<int> layersToExport)
         {
             int iterationCount = (Descriptors.Length - 1 < maxIterations) ? Descriptors.Length - 1 : maxIterations;
 
             List<double> iterationDistances = new List<double>();
+            List<Centroid[]> results = new List<Centroid[]>();
 
             weightedCentroids = WeightedCentroid.FromDescriptors(Descriptors);
             Centroids = new Centroid[iterationCount][];
@@ -80,10 +87,16 @@ namespace DescriptorClustering.Hierarchical.Agglomerative
 
                 ComputeNewDistances(mergedId, droppedId);
 
-                Centroid[] layerCentroids = ExportLayer();
-                AssignClosestDescriptors(layerCentroids, Descriptors);
-                Centroids[(iterationCount - 1) - i] = layerCentroids;
+                // export levels
+                if (layersToExport.Contains((iterationCount - 1) - i))
+                {
+                    Centroid[] layerCentroids = ExportLayer();
+                    AssignClosestDescriptors(layerCentroids, Descriptors);
+                    //Centroids[(iterationCount - 1) - i] = layerCentroids;
+                    results.Add(layerCentroids);
+                }
             }
+            Centroids = results.ToArray();
             return iterationDistances.ToArray();
         }
 
@@ -272,25 +285,22 @@ namespace DescriptorClustering.Hierarchical.Agglomerative
         class WeightedCentroid
         {
             public Centroid Centroid { get; set;}
-            public int Weight { get; set; }
-
-            public WeightedCentroid(Centroid centroid, int weight)
-            {
-                Centroid = centroid;
-                Weight = weight;
+            public int Weight {
+                get
+                {
+                    return Centroid.Descriptors.Count;
+                }
             }
 
             public WeightedCentroid(Centroid centroid)
             {
                 Centroid = centroid;
-                Weight = 1;
             }
 
             public WeightedCentroid(int id, Descriptor descriptor)
             {
                 Centroid = new Centroid(id, descriptor);
                 Centroid.Descriptors.Add(descriptor);
-                Weight = 1;
             }
 
             public static WeightedCentroid Merge(WeightedCentroid merged, WeightedCentroid dropped)

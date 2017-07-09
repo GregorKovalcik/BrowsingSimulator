@@ -17,7 +17,7 @@ namespace SmallDataTestAndVisualization
             int seed = 5334;
             int windowSize = 720;
 
-            int nDescriptors = 100;
+            int nDescriptors = 1000;
             int descriptorDimension = 2;
             int nClusters = 100;
             int iterationCount = 10;
@@ -35,15 +35,23 @@ namespace SmallDataTestAndVisualization
             //clustering.Clusterize(nClusters, iterationCount, seed);
 
             ClusteringAgglomerative clustering = new ClusteringAgglomerative(descriptors);
+            //clustering.Clusterize(new List<int> { 0, 1, 3, 7, 15, 31, 63, 127, 255, 511 });
             clustering.Clusterize();
 
-            //HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids[4], windowSize, windowSize);
+            //HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids[0], windowSize, windowSize);
 
-            int resolution = 20;
-            for (int i = clustering.Centroids.Length - 1; i > 0; i -= clustering.Centroids.Length / resolution)
-            {
-                HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids[i], windowSize, windowSize);
-            }
+            //for (int i = clustering.Centroids.Length - 1; i > 0; i--)
+            //{
+            //    HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids[i], windowSize, windowSize);
+            //}
+
+            HelperTestClass.SaveClustering(clustering.Descriptors, clustering.Centroids, windowSize, windowSize, "clustering");
+
+            //int resolution = 20;
+            //for (int i = clustering.Centroids.Length - 1; i > 0; i -= clustering.Centroids.Length / resolution)
+            //{
+            //    HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids[i], windowSize, windowSize);
+            //}
         }
     }
 }

@@ -140,6 +140,63 @@ namespace TestClustering
             ShowInPictureBox(bmp);
         }
 
+        public static void SaveClustering(Descriptor[] descriptors, Centroid[][] centroidLayers, int width, int height, string filename)
+        {
+            for (int iLayer = 0; iLayer < centroidLayers.Length; iLayer++)
+            {
+                Centroid[] centroidLayer = centroidLayers[(centroidLayers.Length - 1) - iLayer];
+
+                Bitmap bmp = new Bitmap(width, height);
+                using (Graphics g = Graphics.FromImage(bmp))
+                {
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    g.Clear(Color.White);
+
+                    // draw centroid - descriptor lines
+                    Color color = Color.Gray;
+                    Pen centroidLinePen = new Pen(color);
+                    centroidLinePen.Width = 1;
+                    foreach (Centroid c in centroidLayer)
+                    {
+                        foreach (Descriptor d in c.Descriptors)
+                        {
+                            g.DrawLine(centroidLinePen,
+                                    c.Mean.Values[0] * bmp.Width, c.Mean.Values[1] * bmp.Height,
+                                    d.Values[0] * bmp.Width, d.Values[1] * bmp.Height);
+                        }
+                    }
+                    
+
+                    // draw points
+                    foreach (Descriptor d in descriptors)
+                    {
+                        float[] v = d.Values;
+                        g.DrawEllipse(Pens.Black, v[0] * bmp.Width - 1, v[1] * bmp.Height - 1, 2, 2);
+                    }
+
+                    // draw centroids
+                    
+                    color = Color.Red;
+                    Pen centroidPen = new Pen(color);
+                    centroidPen.Width = 2;
+
+                    foreach (Centroid c in centroidLayer)
+                    {
+                        if (c.Mean == null) continue;
+                        int elipseRadius = 3;
+                        g.DrawEllipse(centroidPen,
+                            c.Mean.Values[0] * bmp.Width - elipseRadius,
+                            c.Mean.Values[1] * bmp.Height - elipseRadius,
+                            elipseRadius * 2, elipseRadius * 2);
+                    }
+                    
+                }
+
+                bmp.Save(filename + "_" + ((centroidLayers.Length - 1) - iLayer) + ".png");
+                bmp.Dispose();
+            }
+        }
+
 
         public static void ShowInPictureBox(Bitmap bitmap)
         {
