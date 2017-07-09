@@ -170,42 +170,14 @@ namespace TestClustering
             HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids, windowSize, windowSize);
         }
 
-        public void TestDescriptorAssignment(int nDescriptors, Centroid[] centroids)
-        {
-            bool[] isAssigned = Enumerable.Repeat(false, nDescriptors).ToArray();
-
-            // catch duplicate assignments
-            foreach (Centroid centroid in centroids)
-            {
-                foreach (Descriptor descriptor in centroid.Descriptors)
-                {
-                    Assert.IsFalse(isAssigned[descriptor.Id], "Duplicate assignment detected!");
-                    isAssigned[descriptor.Id] = true;
-                }
-            }
-
-            // catch not assigned
-            foreach (bool assignment in isAssigned)
-            {
-                Assert.IsTrue(assignment, "Descriptor without assignment detected!");
-            }
-
-            // catch duplicate centroids
-            HashSet<int> hashSet = new HashSet<int>();
-            foreach (Centroid centroid in centroids)
-            {
-                Assert.IsTrue(!hashSet.Contains(centroid.Mean.Id));
-                hashSet.Add(centroid.Mean.Id);
-            }
-        }
-
+        
 
         [TestMethod]
         public void TestDescriptorAssignmentSimple()
         {
             ClusteringSimple clustering = new ClusteringSimple(descriptors);
             clustering.Clusterize(nClusters, iterationCount, seed);
-            TestDescriptorAssignment(descriptors.Length, clustering.Centroids);
+            HelperTestClass.TestDescriptorAssignment(descriptors.Length, clustering.Centroids);
         }
 
         [TestMethod]
@@ -216,7 +188,7 @@ namespace TestClustering
             
             ClusteringDivisive clustering = new ClusteringDivisive(descriptors);
             clustering.Clusterize(nClusters, iterationCounts, seed);
-            TestDescriptorAssignment(descriptors.Length, clustering.Centroids[clustering.Centroids.Length - 1]);
+            HelperTestClass.TestDescriptorAssignment(descriptors.Length, clustering.Centroids[clustering.Centroids.Length - 1]);
         }
 
         [TestMethod]
@@ -230,7 +202,8 @@ namespace TestClustering
             ClusteringAgglomerative clustering = new ClusteringAgglomerative(descriptors);
 
             clustering.Clusterize();
-            HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids[0], windowSize, windowSize);
+            HelperTestClass.TestDescriptorAssignment(descriptors.Length, clustering.Centroids[0]);
+            HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids[23], windowSize, windowSize);
         }
 
     }

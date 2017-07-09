@@ -12,16 +12,22 @@ namespace DescriptorClustering.Hierarchical.Agglomerative
     {
         private WeightedCentroid[] weightedCentroids;
         private double[][] centroidDistances;
+        private double[] rowMinimalDistances;
+        private int[] rowMinimalDistanceIds;
         private bool[] isDropped;
 
         public ClusteringAgglomerative(Descriptor[] descriptors) : base(descriptors)
         {
             centroidDistances = new double[descriptors.Length][];
+            rowMinimalDistances = new double[descriptors.Length];
+            rowMinimalDistanceIds = new int[descriptors.Length];
             isDropped = new bool[descriptors.Length];
             for (int i = 0; i < descriptors.Length; i++)
             {
                 isDropped[i] = false;
                 centroidDistances[i] = new double[descriptors.Length];
+                rowMinimalDistances[i] = double.MaxValue;
+                rowMinimalDistanceIds[i] = -1;
             }
         }
 
@@ -85,79 +91,161 @@ namespace DescriptorClustering.Hierarchical.Agglomerative
         private void PrecomputeAllDistances()
         {
             Parallel.For(0, centroidDistances.Length, i =>
-            //for (int i = 0; i < centroidDistances.Length; i++)
             {
-                for (int j = 0; j <= i; j++)
+                for (int j = 0; j < i; j++)
                 {
-                    centroidDistances[i][j] = centroidDistances[j][i] = WeightedCentroid.GetDistance(weightedCentroids[i], weightedCentroids[j]);
+                    // precompute distance
+                    centroidDistances[i][j] = WeightedCentroid.GetDistance(weightedCentroids[i], weightedCentroids[j]);
+                    // precompute minimal distance in a row
+                    if (centroidDistances[i][j] < rowMinimalDistances[i])
+                    {
+                        rowMinimalDistances[i] = centroidDistances[i][j];
+                        rowMinimalDistanceIds[i] = j;
+                    }
                 }
-            //}
             });
         }
 
         private void ComputeNewDistances(int mergedCentroidId, int droppedCentroidId)
         {
-            Parallel.For(0, centroidDistances.Length, i =>
-            //for (int i = 0; i < centroidDistances.Length; i++)
+            // invalidate dropped data
+            rowMinimalDistances[droppedCentroidId] = double.NaN;
+            rowMinimalDistanceIds[droppedCentroidId] = -1;
+            Parallel.For(0, droppedCentroidId, j =>
             {
-                // compute new distances
-                if (!isDropped[i])
-                {
-                    centroidDistances[i][mergedCentroidId] = centroidDistances[mergedCentroidId][i]
-                        = WeightedCentroid.GetDistance(weightedCentroids[i], weightedCentroids[mergedCentroidId]);
-                }
-                // invalidate dropped distances (just to be sure)
-                centroidDistances[i][droppedCentroidId] = centroidDistances[droppedCentroidId][i] = double.NaN;
-            //}
+                centroidDistances[droppedCentroidId][j] = double.NaN;
             });
-        }
-
-        private Tuple<int, int> FindMinimalDistanceIds()
-        {
-            // initial values
-            double[] minimalDistances = new double[centroidDistances.Length];
-            int[] minimalIndexesJ = new int[centroidDistances.Length];
-            for (int i = 0; i < centroidDistances.Length; i++)
+            Parallel.For(droppedCentroidId + 1, centroidDistances.Length, i =>
             {
-                minimalDistances[i] = double.MaxValue;
-                minimalIndexesJ[i] = -1;
+                centroidDistances[i][droppedCentroidId] = double.NaN;
+            });
+
+
+            // compute new distances and minimal value in mergedId row
+            rowMinimalDistances[mergedCentroidId] = double.MaxValue;
+            Parallel.For(0, mergedCentroidId, j =>
+            {
+                if (!isDropped[j])
+                {
+                    centroidDistances[mergedCentroidId][j]
+                        = WeightedCentroid.GetDistance(weightedCentroids[j], weightedCentroids[mergedCentroidId]);
+
+                    // update minimal distances
+                    if (centroidDistances[mergedCentroidId][j] < rowMinimalDistances[mergedCentroidId])
+                    {
+                        rowMinimalDistances[mergedCentroidId] = centroidDistances[mergedCentroidId][j];
+                        rowMinimalDistanceIds[mergedCentroidId] = j;
+                    }
+                }
+            });
+            if (rowMinimalDistances[mergedCentroidId] == double.MaxValue)
+            {
+                rowMinimalDistances[mergedCentroidId] = double.NaN;
             }
 
-            // searching
-            Parallel.For(0, centroidDistances.Length, i =>
-            //for (int i = 0; i < centroidDistances.Length; i++)
+            // compute new distances in mergedId column
+            Parallel.For(mergedCentroidId + 1, centroidDistances.Length, i =>
             {
                 if (!isDropped[i])
                 {
-                    for (int j = 0; j < i; j++)
+                    centroidDistances[i][mergedCentroidId]
+                        = WeightedCentroid.GetDistance(weightedCentroids[i], weightedCentroids[mergedCentroidId]);
+
+                    // update minimal distances
+                    if (centroidDistances[i][mergedCentroidId] < rowMinimalDistances[i])
                     {
-                        if (!isDropped[j])
-                        {
-                            if (centroidDistances[i][j] < minimalDistances[i])
-                            {
-                                minimalDistances[i] = centroidDistances[i][j];
-                                minimalIndexesJ[i] = j;
-                            }
-                        }
+                        rowMinimalDistances[i] = centroidDistances[i][mergedCentroidId];
+                        rowMinimalDistanceIds[i] = mergedCentroidId;
                     }
                 }
             });
 
+
+            // find new minimal value in the row if the value from dropped column was minimal
+            for (int i = droppedCentroidId + 1; i < centroidDistances.Length; i++)
+            {
+                if (!isDropped[i] && rowMinimalDistanceIds[i] == droppedCentroidId)
+                {
+                    rowMinimalDistances[i] = double.MaxValue;
+                    rowMinimalDistanceIds[i] = -1;
+                    for (int j = 0; j < i; j++)
+                    {
+                        if (!isDropped[j] && centroidDistances[i][j] < rowMinimalDistances[i]) 
+                        {
+                            rowMinimalDistances[i] = centroidDistances[i][j];
+                            rowMinimalDistanceIds[i] = j;
+                        }
+                    }
+                    if (rowMinimalDistances[i] == double.MaxValue)
+                    {
+                        rowMinimalDistances[i] = double.NaN;
+                    }
+                }
+            }
+        }
+        private Tuple<int, int> FindMinimalDistanceIds()
+        {
+            // initial values
+            //double[] minimalDistances = new double[centroidDistances.Length];
+            //int[] minimalIndexesJ = new int[centroidDistances.Length];
+            //for (int i = 0; i < centroidDistances.Length; i++)
+            //{
+            //    minimalDistances[i] = double.MaxValue;
+            //    minimalIndexesJ[i] = -1;
+            //}
+
+            // searching
+            //Parallel.For(0, centroidDistances.Length, i =>
+            ////for (int i = 0; i < centroidDistances.Length; i++)
+            //{
+            //    if (!isDropped[i])
+            //    {
+            //        for (int j = 0; j < i; j++)
+            //        {
+            //            if (!isDropped[j])
+            //            {
+            //                if (centroidDistances[i][j] < minimalDistances[i])
+            //                {
+            //                    minimalDistances[i] = centroidDistances[i][j];
+            //                    minimalIndexesJ[i] = j;
+            //                }
+            //            }
+            //        }
+            //    }
+            //});
+
+            //double minimalDistance = double.MaxValue;
+            //int minimalIndexI = -1;
+            //for (int i = 0; i < minimalDistances.Length; i++)
+            //{
+            //    if (!isDropped[i])
+            //    {
+            //        if (minimalDistances[i] < minimalDistance)
+            //        {
+            //            minimalDistance = minimalDistances[i];
+            //            minimalIndexI = i;
+            //        }
+            //    }
+            //}
+
+            //return new Tuple<int, int>(minimalIndexI, minimalIndexesJ[minimalIndexI]);
+
+            // new code, using a column of precomputed minimal values
             double minimalDistance = double.MaxValue;
             int minimalIndexI = -1;
-            for (int i = 0; i < minimalDistances.Length; i++)
+            for (int i = 1; i < rowMinimalDistances.Length; i++)
             {
                 if (!isDropped[i])
                 {
-                    if (minimalDistances[i] < minimalDistance)
+                    if (rowMinimalDistances[i] < minimalDistance)
                     {
-                        minimalDistance = minimalDistances[i];
+                        minimalDistance = rowMinimalDistances[i];
                         minimalIndexI = i;
                     }
                 }
             }
 
-            return new Tuple<int, int>(minimalIndexI, minimalIndexesJ[minimalIndexI]);
+            return new Tuple<int, int>(minimalIndexI, rowMinimalDistanceIds[minimalIndexI]);
         }
 
         private void MergeClusters(int mergedId, int droppedId)

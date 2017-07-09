@@ -37,9 +37,12 @@ namespace SmallDataTestAndVisualization
             ClusteringAgglomerative clustering = new ClusteringAgglomerative(descriptors);
             clustering.Clusterize();
 
-            for (int i = 9; i > 0; i--)
+            //HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids[4], windowSize, windowSize);
+
+            int resolution = 20;
+            for (int i = clustering.Centroids.Length - 1; i > 0; i -= clustering.Centroids.Length / resolution)
             {
-                HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids[10 * i], windowSize, windowSize);
+                HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids[i], windowSize, windowSize);
             }
         }
     }

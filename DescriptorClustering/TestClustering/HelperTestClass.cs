@@ -1,4 +1,5 @@
 ﻿using DescriptorClustering;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -39,6 +40,35 @@ namespace TestClustering
                 vector[i] = (float)(random.NextDouble() * scale);
             }
             return vector;
+        }
+
+        public static void TestDescriptorAssignment(int nDescriptors, Centroid[] centroids)
+        {
+            bool[] isAssigned = Enumerable.Repeat(false, nDescriptors).ToArray();
+
+            // catch duplicate assignments
+            foreach (Centroid centroid in centroids)
+            {
+                foreach (Descriptor descriptor in centroid.Descriptors)
+                {
+                    Assert.IsFalse(isAssigned[descriptor.Id], "Duplicate assignment detected!");
+                    isAssigned[descriptor.Id] = true;
+                }
+            }
+
+            // catch not assigned
+            foreach (bool assignment in isAssigned)
+            {
+                Assert.IsTrue(assignment, "Descriptor without assignment detected!");
+            }
+
+            // catch duplicate centroids
+            HashSet<int> hashSet = new HashSet<int>();
+            foreach (Centroid centroid in centroids)
+            {
+                Assert.IsTrue(!hashSet.Contains(centroid.Id));
+                hashSet.Add(centroid.Id);
+            }
         }
 
 
