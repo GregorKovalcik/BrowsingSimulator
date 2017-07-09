@@ -43,6 +43,29 @@ namespace DescriptorClustering
         }
 
 
+        protected static void AssignClosestDescriptors(Centroid[] centroids, Descriptor[] descriptors)
+        {
+            Parallel.ForEach(centroids, centroid =>
+            {
+                double smallestDistance = double.MaxValue;
+                Descriptor closestDescriptor = null;
+                foreach (Descriptor descriptor in descriptors)
+                {
+                    double distance = Descriptor.GetDistanceSQR(centroid.Mean.Values, descriptor.Values);  // TODO: change to Func<>
+                    if (distance < smallestDistance)
+                    {
+                        smallestDistance = distance;
+                        closestDescriptor = descriptor;
+                    }
+                }
+                centroid.AssignClosestDescriptor(closestDescriptor);
+
+#if VERBOSE
+                Console.WriteLine("Descriptor {0} assigned to cluster: {1}", closestDescriptor.Id, centroid.Id);
+#endif
+            });
+        }
+
 
         //protected static void LogProgress(string id, int processedCount, int totalCount,
         //    Stopwatch stopwatch, ref long lastMiliseconds, int workUnitSize = 100)

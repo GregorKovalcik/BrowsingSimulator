@@ -141,29 +141,6 @@ namespace DescriptorClustering.Simple
         }
 
 
-        protected override void AssignClosestDescriptors()
-        {
-            Parallel.ForEach(Centroids, centroid =>
-            {
-                double smallestDistance = double.MaxValue;
-                Descriptor closestDescriptor = null;
-                foreach (Descriptor descriptor in Descriptors)
-                {
-                    double distance = Descriptor.GetDistanceSQR(centroid.Mean.Values, descriptor.Values);  // TODO: change to Func<>
-                    if (distance < smallestDistance)
-                    {
-                        smallestDistance = distance;
-                        closestDescriptor = descriptor;
-                    }
-                }
-                centroid.AssignClosestDescriptor(closestDescriptor);
-
-#if DEBUG
-                Console.WriteLine("Descriptor {0} assigned to cluster: {1}", closestDescriptor.Id, centroid.Id);
-#endif
-            });
-        }
-
         
     }
 }

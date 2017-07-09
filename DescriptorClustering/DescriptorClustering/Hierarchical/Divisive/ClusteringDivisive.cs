@@ -48,12 +48,11 @@ namespace DescriptorClustering.Hierarchical.Divisive
 
 
         // TODO: warning - no linkage between centroids of different layers. This is just heuristics for the lowest layer.
-        public override double[][] Clusterize(int[] layerSeedCounts, int[] iterationCounts, int randomSeed)
+        public virtual double[] Clusterize(int[] layerSeedCounts, int[] iterationCounts, int randomSeed)
         {
             CheckClusterizeArguments(layerSeedCounts, iterationCounts);
 
             int layerCount = layerSeedCounts.Length;
-            double[][] updateDeltas = new double[layerCount][];
             Centroid[][] hierarchicalClusters = new Centroid[layerCount][];
 
 #if VERBOSE
@@ -61,7 +60,7 @@ namespace DescriptorClustering.Hierarchical.Divisive
 #endif
             // compute the highest layer
             ClusteringSimple clusteringSimple = new ClusteringSimple(Descriptors);
-            updateDeltas[0] = clusteringSimple.Clusterize(layerSeedCounts[0], iterationCounts[0], randomSeed);
+            double[] updateDeltas = clusteringSimple.Clusterize(layerSeedCounts[0], iterationCounts[0], randomSeed);
             hierarchicalClusters[0] = clusteringSimple.Centroids;
 
             // run clustering for each other layer
@@ -83,7 +82,7 @@ namespace DescriptorClustering.Hierarchical.Divisive
 #if VERBOSE
                     Console.WriteLine("Clusterization of {0} seeds, {1} iterations.", seedCount, iterationCounts[iLayer]);
 #endif
-                    updateDeltas[iLayer] = clusteringSimple.Clusterize(seedCount, iterationCounts[iLayer], randomSeed);
+                    clusteringSimple.Clusterize(seedCount, iterationCounts[iLayer], randomSeed);
 #if VERBOSE
                     Console.WriteLine("Clusterization complete, {0} clusters found.", clusteringSimple.Centroids.Length);
 #endif
@@ -103,7 +102,7 @@ namespace DescriptorClustering.Hierarchical.Divisive
             }
             Centroids = hierarchicalClusters;
 
-            return updateDeltas;
+            return updateDeltas;    // TODO deltas are just for the first layer
         }
 
 

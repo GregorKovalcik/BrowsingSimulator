@@ -84,5 +84,9 @@ namespace DescriptorClustering
             return accumulator;
         }
 
+        public Descriptor Clone()
+        {
+            return new Descriptor(Id, (float[])Values.Clone());
+        }
     }
 }

@@ -62,7 +62,7 @@ namespace DescriptorClustering.Simple
             Console.WriteLine("Iterating finished. Asigning the closest descriptors.");
 #endif
 
-            AssignClosestDescriptors();
+            AssignClosestDescriptors(Centroids, Descriptors);
 
             return updateDeltas;
         }
@@ -72,7 +72,5 @@ namespace DescriptorClustering.Simple
         protected abstract double Update();
 
         protected abstract int DropEmptyCentroids();
-
-        protected abstract void AssignClosestDescriptors();
     }
 }

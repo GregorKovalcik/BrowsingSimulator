@@ -20,11 +20,25 @@ namespace DescriptorClustering
             Descriptors = new List<Descriptor>();
         }
 
+        public Centroid(int id)
+        {
+            Id = id;
+            Mean = null;
+            Descriptors = new List<Descriptor>();
+        }
+
         public Centroid(int id, Descriptor seed)
         {
             Id = id;
             Mean = seed;
             Descriptors = new List<Descriptor>();
+        }
+
+        public Centroid(int id, Descriptor seed, List<Descriptor> descriptors)
+        {
+            Id = id;
+            Mean = seed;
+            Descriptors = descriptors;
         }
 
         public void AddDescriptorConcurrent(Descriptor descriptor)
@@ -64,6 +78,11 @@ namespace DescriptorClustering
         public void AssignClosestDescriptor(Descriptor descriptor)
         {
             Mean = descriptor;
+        }
+
+        public Centroid Clone()
+        {
+            return new Centroid(Id, Mean, Descriptors);
         }
     }
 }

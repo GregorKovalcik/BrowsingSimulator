@@ -20,11 +20,6 @@ namespace DescriptorClustering.Simple
             throw new NotImplementedException();
         }
 
-        protected override void AssignClosestDescriptors()
-        {
-            throw new NotImplementedException();
-        }
-
         protected override int DropEmptyCentroids()
         {
             throw new NotImplementedException();

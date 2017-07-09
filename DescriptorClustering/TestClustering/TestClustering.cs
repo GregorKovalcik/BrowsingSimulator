@@ -6,6 +6,7 @@ using System.Diagnostics;
 using DescriptorClustering.Hierarchical.Divisive;
 using System.Linq;
 using System.Collections.Generic;
+using DescriptorClustering.Hierarchical.Agglomerative;
 
 namespace TestClustering
 {
@@ -218,7 +219,19 @@ namespace TestClustering
             TestDescriptorAssignment(descriptors.Length, clustering.Centroids[clustering.Centroids.Length - 1]);
         }
 
-        
-        
+        [TestMethod]
+        public void VisualizeAgglomerative()
+        {
+            int nDescriptors = 100;
+            int descriptorDimension = 2;
+            int nDescriptorsDiv5 = nDescriptors / 5;
+
+            Descriptor[] descriptors = HelperTestClass.GenerateHierarchicalDescriptors(seed, nDescriptorsDiv5, descriptorDimension);
+            ClusteringAgglomerative clustering = new ClusteringAgglomerative(descriptors);
+
+            clustering.Clusterize();
+            HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids[0], windowSize, windowSize);
+        }
+
     }
 }

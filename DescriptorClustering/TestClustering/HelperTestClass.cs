@@ -57,7 +57,7 @@ namespace TestClustering
                 g.Clear(Color.White);
 
                 // draw centroid - descriptor lines
-                for (int i = 0/*centroidLayers.Length - 1*/; i >= 0; i--)
+                for (int i = centroidLayers.Length - 1; i >= 0; i--)
                 {
                     Centroid[] centroidLayer = centroidLayers[(centroidLayers.Length - 1) - i];
                     //Color color = Color.Blue;

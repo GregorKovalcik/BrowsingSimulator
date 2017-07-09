@@ -15,6 +15,5 @@ namespace DescriptorClustering.Hierarchical
         {
         }
 
-        public abstract double[][] Clusterize(int[] layerSeedCounts, int[] iterationCounts, int randomSeed);
     }
 }
