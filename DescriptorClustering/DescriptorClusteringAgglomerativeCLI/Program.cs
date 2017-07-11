@@ -62,7 +62,7 @@ namespace DescriptorClusteringCLI
                 for (int i = 0; i < idsToExtract.Count; i++)
                 {
                     float[] features = featureReader.GetFeatures(idsToExtract[i]);    // TODO: optimize
-                    descriptors[i] = new Descriptor(i, features);
+                    descriptors[i] = new Descriptor(idsToExtract[i], features);
                 }
                 return descriptors;
             }
