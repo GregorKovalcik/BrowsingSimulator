@@ -30,7 +30,7 @@ namespace DescriptorClusteringCLI
             foreach (Centroid[] layerCentroids in clustering.Centroids)
             {
                 string filename = Path.GetFileNameWithoutExtension(outputFile) + "_" + layerCentroids.Length 
-                    + "." + Path.GetExtension(outputFile);
+                    + Path.GetExtension(outputFile);
 
                 WriteToTextFile(layerCentroids, filename);
             }
@@ -55,7 +55,7 @@ namespace DescriptorClusteringCLI
                 }
             }
 
-            using (FeatureReader featureReader = new FeatureReader(descriptorFile))
+            using (FeatureReader featureReader = new FeatureReader(descriptorFile, false))
             {
                 Console.WriteLine("Loading {0} descriptors ({1} dimensions).", idsToExtract.Count, featureReader.FeatureDimension);
                 Descriptor[] descriptors = new Descriptor[idsToExtract.Count];

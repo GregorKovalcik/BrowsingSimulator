@@ -71,7 +71,7 @@ namespace DescriptorClusteringCLI
 
         private static Descriptor[] LoadArrayDescriptors(string descriptorFile)
         {
-            using (FeatureReader featureReader = new FeatureReader(descriptorFile))
+            using (FeatureReader featureReader = new FeatureReader(descriptorFile, false))
             {
                 Console.WriteLine("Loading {0} descriptors ({1} dimensions).", featureReader.FeatureCount, featureReader.FeatureDimension);
                 Descriptor[] descriptors = new Descriptor[featureReader.FeatureCount];
