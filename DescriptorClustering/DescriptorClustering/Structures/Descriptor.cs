@@ -88,5 +88,12 @@ namespace DescriptorClustering
         {
             return new Descriptor(Id, (float[])Values.Clone());
         }
+
+
+
+        public override string ToString()
+        {
+            return Id.ToString();
+        }
     }
 }

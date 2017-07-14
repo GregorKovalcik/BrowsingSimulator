@@ -91,7 +91,7 @@ namespace DescriptorClustering.Hierarchical.Agglomerative
                 if (layersToExport.Contains((iterationCount - 1) - i))
                 {
                     Centroid[] layerCentroids = ExportLayer();
-                    AssignClosestDescriptors(layerCentroids, Descriptors);
+                    AssignClosestDescriptors(layerCentroids);
                     //Centroids[(iterationCount - 1) - i] = layerCentroids;
                     results.Add(layerCentroids);
                 }

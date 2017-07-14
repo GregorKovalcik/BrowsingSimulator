@@ -52,6 +52,31 @@ namespace DescriptorClustering.Simple
 #if PARALLEL
             );
 #endif
+#if DEBUG
+            TestUniqueDescriptorAssignment(Centroids);
+#endif
+        }
+
+
+        protected static void TestUniqueDescriptorAssignment(Centroid[] centroids)
+        {
+            HashSet<int> hashSet = new HashSet<int>();
+            foreach (Centroid centroid in centroids)
+            {
+                foreach (Descriptor descriptor in centroid.Descriptors)
+                {
+                    if (hashSet.Contains(descriptor.Id))
+                    {
+                        throw new ArgumentException("Descriptor double assignment detected! ID: " + descriptor.Id);
+                    }
+                    else
+                    {
+                        hashSet.Add(descriptor.Id);
+                    }
+                }
+            }
+
+            Console.WriteLine("Descriptor assignment tested, no duplicates found.");
         }
 
 

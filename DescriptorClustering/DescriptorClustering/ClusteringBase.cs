@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define PARALLEL
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -43,13 +45,18 @@ namespace DescriptorClustering
         }
 
 
-        protected static void AssignClosestDescriptors(Centroid[] centroids, Descriptor[] descriptors)
+        protected static void AssignClosestDescriptors(Centroid[] centroids)
         {
-            Parallel.ForEach(centroids, centroid =>
+#if PARALLEL
+            Parallel.ForEach(centroids, centroid => {
+#else
+            for (int i = 0; i < centroids.Length; i++)
             {
+                Centroid centroid = centroids[i];
+#endif
                 double smallestDistance = double.MaxValue;
                 Descriptor closestDescriptor = null;
-                foreach (Descriptor descriptor in descriptors)
+                foreach (Descriptor descriptor in centroid.Descriptors)
                 {
                     double distance = Descriptor.GetDistanceSQR(centroid.Mean.Values, descriptor.Values);  // TODO: change to Func<>
                     if (distance < smallestDistance)
@@ -59,13 +66,35 @@ namespace DescriptorClustering
                     }
                 }
                 centroid.AssignClosestDescriptor(closestDescriptor);
-
 #if VERBOSE
                 Console.WriteLine("Descriptor {0} assigned to cluster: {1}", closestDescriptor.Id, centroid.Id);
 #endif
-            });
+            }
+#if PARALLEL
+            );
+#endif
+#if DEBUG
+            TestUniqueCentroidAssignment(centroids);
+#endif
         }
 
+        protected static void TestUniqueCentroidAssignment(Centroid[] centroids)
+        {
+            HashSet<int> hashSet = new HashSet<int>();
+            foreach (Centroid centroid in centroids)
+            {
+                if (hashSet.Contains(centroid.Mean.Id))
+                {
+                    throw new ArgumentException("Centroid double assignment detected! ID: " + centroid.Mean.Id);
+                }
+                else
+                {
+                    hashSet.Add(centroid.Mean.Id);
+                }
+            }
+
+            Console.WriteLine("Descriptor assignment tested, no duplicates found.");
+        }
 
         //protected static void LogProgress(string id, int processedCount, int totalCount,
         //    Stopwatch stopwatch, ref long lastMiliseconds, int workUnitSize = 100)

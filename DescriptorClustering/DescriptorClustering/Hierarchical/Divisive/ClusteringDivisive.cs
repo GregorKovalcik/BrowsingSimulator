@@ -62,6 +62,14 @@ namespace DescriptorClustering.Hierarchical.Divisive
             ClusteringSimple clusteringSimple = new ClusteringSimple(Descriptors);
             double[] updateDeltas = clusteringSimple.Clusterize(layerSeedCounts[0], iterationCounts[0], randomSeed);
             hierarchicalClusters[0] = clusteringSimple.Centroids;
+            
+#if VERBOSE
+            Console.WriteLine("Helper higher level clustering added: ");
+            foreach (Centroid c in clusteringSimple.Centroids)
+            {
+                Console.WriteLine("{0}:", c.Mean.Id);
+            }
+#endif
 
             // run clustering for each other layer
             for (int iLayer = 1; iLayer < layerCount; iLayer++)
@@ -94,6 +102,13 @@ namespace DescriptorClustering.Hierarchical.Divisive
                     }
 
                     lowerLayerCentroids.AddRange(clusteringSimple.Centroids);
+#if VERBOSE
+                    Console.WriteLine("Cluster {0} added: ", higherLayerCentroid.Mean.Id);
+                    foreach (Centroid c in clusteringSimple.Centroids)
+                    {
+                        //Console.WriteLine("{0}:", c.Mean.Id);
+                    }
+#endif
                 }
                 hierarchicalClusters[iLayer] = lowerLayerCentroids.ToArray();
 #if VERBOSE

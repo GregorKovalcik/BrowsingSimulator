@@ -84,5 +84,10 @@ namespace DescriptorClustering
         {
             return new Centroid(Id, Mean, Descriptors);
         }
+
+        public override string ToString()
+        {
+            return Id.ToString() + " (" + Mean.Id.ToString() + ")";
+        }
     }
 }

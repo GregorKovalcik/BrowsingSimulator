@@ -55,7 +55,7 @@ namespace DescriptorClusteringCLI
                 }
             }
 
-            using (FeatureReader featureReader = new FeatureReader(descriptorFile, false))
+            using (FeatureReader featureReader = new FeatureReader(descriptorFile, true))
             {
                 Console.WriteLine("Loading {0} descriptors ({1} dimensions).", idsToExtract.Count, featureReader.FeatureDimension);
                 Descriptor[] descriptors = new Descriptor[idsToExtract.Count];
