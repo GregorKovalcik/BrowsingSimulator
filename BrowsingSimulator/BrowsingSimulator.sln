@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowsingSimulatorCLI", "Bro
 		{DBF1E962-FD26-4B3B-A8D1-CF56FD988098} = {DBF1E962-FD26-4B3B-A8D1-CF56FD988098}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomSubsequenceGenerator", "RandomSubsequenceGenerator\RandomSubsequenceGenerator.csproj", "{896893F0-E193-48F0-B722-AECAEB8EB383}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -24,6 +26,10 @@ Global
 		{886D5977-CD23-4321-B9EA-5565F4CF3120}.Debug|x64.Build.0 = Debug|x64
 		{886D5977-CD23-4321-B9EA-5565F4CF3120}.Release|x64.ActiveCfg = Release|x64
 		{886D5977-CD23-4321-B9EA-5565F4CF3120}.Release|x64.Build.0 = Release|x64
+		{896893F0-E193-48F0-B722-AECAEB8EB383}.Debug|x64.ActiveCfg = Debug|x64
+		{896893F0-E193-48F0-B722-AECAEB8EB383}.Debug|x64.Build.0 = Debug|x64
+		{896893F0-E193-48F0-B722-AECAEB8EB383}.Release|x64.ActiveCfg = Release|x64
+		{896893F0-E193-48F0-B722-AECAEB8EB383}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

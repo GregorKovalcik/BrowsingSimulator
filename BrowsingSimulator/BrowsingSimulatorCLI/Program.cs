@@ -13,18 +13,32 @@ namespace BrowsingSimulatorCLI
     {
         static void Main(string[] args)
         {
+            System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+            customCulture.NumberFormat.NumberDecimalSeparator = ".";
+            System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
+
             string descriptorFile = args[0];
             string clusteringFileL0 = args[1];
             string clusteringFileL1 = args[2];
-            string outputFile = args[3];
+            string queryIdsFile = args[3];
+            string outputDirectory = args[4];
 
             float[][] descriptors = LoadDescriptorFile(descriptorFile);
             Tuple<int, int[]>[][] clustering = Load3LayerClusteringFiles(clusteringFileL0, clusteringFileL1);
 
             MLES mles = new MLES(descriptors, clustering);
             BrowsingSimulatorEngine simulator = new BrowsingSimulatorEngine(mles);
-            simulator.RunSimulations(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 96, 1, 1);
 
+            Random random = new Random(5334);
+            int[] ids = new int[10];
+            for (int i = 0; i < ids.Length; i++)
+            {
+                ids[i] = random.Next(mles.Dataset.Length - 1);
+            }
+
+            //simulator.RunSimulations(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 24, 1, 1);
+            simulator.RunSimulations(ids, simulator.Mles.Layers[0].Length, 1, 1);
+            simulator.SaveSessionLogs(outputDirectory);
         }
 
 
@@ -92,5 +106,6 @@ namespace BrowsingSimulatorCLI
 
             return result;
         }
+
     }
 }

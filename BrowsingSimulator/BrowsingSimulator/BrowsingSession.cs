@@ -20,11 +20,12 @@ namespace BrowsingSimulator
         public int BrowsingDepth { get; protected set; }
 
         public List<Item> Display { get; protected set; }
-        public LinkedList<BrowsingLog> Log { get; protected set; }
+        public LinkedList<BrowsingLog> Logs { get; protected set; }
 
         public Dictionary<int, int> DisplayedCounter { get; protected set; }
         private Random random;
 
+        public bool ItemFound { get; protected set; }
 
         public BrowsingSession(int id, int displaySize, int zoomingStep, int browsingCoherence, float dropFactor, int randomSeed, MLES mles,
             Item searchedItem)
@@ -42,7 +43,8 @@ namespace BrowsingSimulator
             SearchedItem = searchedItem;
             Display = new List<Item>();
             BrowsingDepth = 0;
-            Log = new LinkedList<BrowsingLog>();
+            Logs = new LinkedList<BrowsingLog>();
+            ItemFound = false;
         }
 
         public void LoadZeroPageDisplay(IEnumerable<Item> zeroPageItems)
@@ -55,8 +57,10 @@ namespace BrowsingSimulator
         public float SelectRandomItemAndGenerateNewDisplay()
         {
             Item query = SelectRandomItem();
-            Console.WriteLine("Layer {0}, selected {1}", LayerDepth, query.LayerLocalId);
-            Log.AddLast(new BrowsingLog(Display.ToArray(), query, LayerDepth, BrowsingDepth));
+            Console.WriteLine("Layer {0}, selected {1}, drop probability: {2}", 
+                LayerDepth, query.LayerLocalId, DropProbability(query.Id));
+            float searchedItemDistance = Item.GetDistanceSQR(query.Descriptor, SearchedItem.Descriptor);
+            Logs.AddLast(new BrowsingLog(Logs.Count, Display.ToArray(), query, searchedItemDistance, LayerDepth, BrowsingDepth));
 
             // zoom vs pan
             if ((LayerDepth < Mles.Layers.Length - 1) && (CurrentZoomingStep++) % ZoomingStep == 0)
@@ -72,6 +76,12 @@ namespace BrowsingSimulator
             }
 
             BrowsingDepth++;
+
+            if (DisplayContainsSearchedItem())
+            {
+                ItemFound = true;
+            }
+
             return Item.GetDistanceSQR(query.Descriptor, SearchedItem.Descriptor);
         }
 
@@ -170,27 +180,37 @@ namespace BrowsingSimulator
             }
             else                                    // the second and other hits
             {
-                int hitCount = DisplayedCounter[id];
-                double dropProbability = 1 - (1 / (hitCount * DropFactor));
+                double dropProbability = DropProbability(id);
                 bool hasItemDroppedOut = random.NextDouble() < dropProbability;
 
                 return hasItemDroppedOut;
             }
+        }
+
+
+        protected float DropProbability(int id)
+        {
+            int hitCount = DisplayedCounter[id];
+            return 1 - (1 / (hitCount * DropFactor));
         }
         
     }
 
     public class BrowsingLog
     {
+        public int Id { get; private set; }
         public Item[] Display { get; private set; }
         public Item SelectedItem { get; private set; }
+        public float SearchedItemDistance { get; private set; }
         public int LayerDepth { get; private set; }
         public int BrowsingDepth { get; private set; }
-
-        public BrowsingLog(Item[] display, Item selectedItem, int layerDepth, int browsingDepth)
+        
+        public BrowsingLog(int id, Item[] display, Item selectedItem, float searchedItemDIstance, int layerDepth, int browsingDepth)
         {
+            Id = id;
             Display = display;
             SelectedItem = selectedItem;
+            SearchedItemDistance = searchedItemDIstance;
             LayerDepth = layerDepth;
             BrowsingDepth = browsingDepth;
         }
