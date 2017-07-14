@@ -1,0 +1,65 @@
+﻿<Window x:Class="SessionLogViewerApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SessionLogViewerApp"
+        mc:Ignorable="d"
+        Title="Session log viewer" Height="720" Width="1280">
+
+    <Grid x:Name="MainGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid x:Name="MenuGrid" Background="Silver" Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" MinWidth="50" />
+            </Grid.ColumnDefinitions>
+
+            <Button Name="LoadLogFileButton" 
+                    Content="Load browsing log file" Grid.Row="0" Grid.Column="0" Click="LoadLogFileButton_Click" />
+            <TextBox Name="LoadedBrowsingLogFileTextBox" 
+                     HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"></TextBox>
+
+            <Button Name="LoadThumbnailsFileButton" 
+                    Content="Load thumbnails file" Grid.Row="1" Grid.Column="0" Click="LoadThumbnailsFileButton_Click"/>
+            <TextBox Name="LoadedThumbnailsFileTextBox" 
+                     HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1"></TextBox>
+
+            <Button Name="ShowDisplayButton" 
+                    Content="Show display" Grid.Row="0" Grid.Column="2" Click="ShowDisplayButton_Click"/>
+            <TextBox Name="DisplayIdTextBox" 
+                HorizontalAlignment="Stretch" 
+                VerticalAlignment="Center" 
+                TextAlignment="Center"
+                Grid.Row="0" Grid.Column="3"
+                PreviewKeyDown="DisplayIdTextBox_PreviewKeyDown"
+                TextChanged="DisplayIdTextBox_TextChanged">0</TextBox>
+
+        </Grid>
+
+        <ScrollViewer Grid.Row="1">
+
+            <ItemsControl ItemsSource="{Binding Thumbnails}" Margin="5" >
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Image Source="{Binding Image}" Width="128" Height="96"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</Window>

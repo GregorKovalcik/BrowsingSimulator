@@ -59,6 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BrowsingLog.cs" />
     <Compile Include="BrowsingSession.cs" />
     <Compile Include="BrowsingSimulator.cs" />
     <Compile Include="MLES\Item.cs" />

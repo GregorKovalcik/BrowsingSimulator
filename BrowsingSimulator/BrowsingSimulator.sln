@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowsingSimulatorCLI", "Bro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomSubsequenceGenerator", "RandomSubsequenceGenerator\RandomSubsequenceGenerator.csproj", "{896893F0-E193-48F0-B722-AECAEB8EB383}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SessionLogViewerApp", "SessionLogViewerApp\SessionLogViewerApp.csproj", "{772FD34C-BBB9-4042-B88D-9B7F319F5A8C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -30,6 +32,10 @@ Global
 		{896893F0-E193-48F0-B722-AECAEB8EB383}.Debug|x64.Build.0 = Debug|x64
 		{896893F0-E193-48F0-B722-AECAEB8EB383}.Release|x64.ActiveCfg = Release|x64
 		{896893F0-E193-48F0-B722-AECAEB8EB383}.Release|x64.Build.0 = Release|x64
+		{772FD34C-BBB9-4042-B88D-9B7F319F5A8C}.Debug|x64.ActiveCfg = Debug|x64
+		{772FD34C-BBB9-4042-B88D-9B7F319F5A8C}.Debug|x64.Build.0 = Debug|x64
+		{772FD34C-BBB9-4042-B88D-9B7F319F5A8C}.Release|x64.ActiveCfg = Release|x64
+		{772FD34C-BBB9-4042-B88D-9B7F319F5A8C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
