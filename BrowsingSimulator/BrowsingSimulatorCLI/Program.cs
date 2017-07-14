@@ -21,31 +21,44 @@ namespace BrowsingSimulatorCLI
             string clusteringFileL0 = args[1];
             string clusteringFileL1 = args[2];
             string queryIdsFile = args[3];
-            string outputDirectory = args[4];
-
+            int[] zoomingSteps = ParseIntArray(args[4]);
+            int[] browsingCoherences = ParseIntArray(args[5]);
+            int[] dropFactors = ParseIntArray(args[6]);
+            string outputDirectory = args[7];
+            string cacheFilename = null;
+            if (args.Length > 8) { cacheFilename = args[8]; }
+            
             float[][] descriptors = LoadDescriptorFile(descriptorFile);
             Tuple<int, int[]>[][] clustering = Load3LayerClusteringFiles(clusteringFileL0, clusteringFileL1);
-
-            MLES mles = new MLES(descriptors, clustering);
+            int[] queryIds = LoadQueryIds(queryIdsFile);
+            MLES mles = new MLES(descriptors, clustering, cacheFilename);
             BrowsingSimulatorEngine simulator = new BrowsingSimulatorEngine(mles);
 
-            Random random = new Random(5334);
-            int[] ids = new int[10];
-            for (int i = 0; i < ids.Length; i++)
-            {
-                ids[i] = random.Next(mles.Dataset.Length - 1);
-            }
+            for (int iZoom = 0; iZoom < zoomingSteps.Length; iZoom++)
+                for (int iCoherence = 0; iCoherence < browsingCoherences.Length; iCoherence++)
+                    for (int iDrop = 0; iDrop < dropFactors.Length; iDrop++)
+                    {
+                        simulator.RunSimulations(queryIds, simulator.Mles.Layers[0].Length, 
+                            zoomingSteps[iZoom], browsingCoherences[iCoherence], dropFactors[iDrop]);
+
+                        string directory = "zoom" + zoomingSteps[iZoom]
+                            + "_coherence" + browsingCoherences[iCoherence]
+                            + "_drop" + dropFactors[iDrop];
+                        string directoryPath = Path.Combine(outputDirectory, directory);
+
+                        simulator.SaveSessionLogs(directoryPath);
+                    }
 
             //simulator.RunSimulations(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 24, 1, 1);
-            simulator.RunSimulations(ids, simulator.Mles.Layers[0].Length, 1, 1);
-            simulator.SaveSessionLogs(outputDirectory);
+            mles.Dispose();
         }
 
 
 
-        public static float[][] LoadDescriptorFile(string descriptorFile)
+        private static float[][] LoadDescriptorFile(string descriptorFile)
         {
-            using (FeatureReader featureReader = new FeatureReader(descriptorFile, true/*false*/))
+            //using (FeatureReader featureReader = new FeatureReader(descriptorFile, false))
+            using (FeatureReader featureReader = new FeatureReader(descriptorFile, true))
             {
                 Console.WriteLine("Loading {0} descriptors ({1} dimensions).", featureReader.FeatureCount, featureReader.FeatureDimension);
                 float[][] descriptors = new float[featureReader.FeatureCount][];
@@ -57,7 +70,7 @@ namespace BrowsingSimulatorCLI
             }
         }
 
-        public static Tuple<int, int[]>[][] Load3LayerClusteringFiles(string clusteringFileL0, string clusteringFileL1)
+        private static Tuple<int, int[]>[][] Load3LayerClusteringFiles(string clusteringFileL0, string clusteringFileL1)
         {
             Tuple<int, int[]>[][] result = new Tuple<int, int[]>[2][];
             using (StreamReader reader = new StreamReader(clusteringFileL0))
@@ -105,6 +118,32 @@ namespace BrowsingSimulatorCLI
             }
 
             return result;
+        }
+
+        private static int[] ParseIntArray(string commaSeparatedIntArray)
+        {
+            string[] tokens = commaSeparatedIntArray.Split(',');
+            int[] intArray = new int[tokens.Length];
+
+            for (int i = 0; i < tokens.Length; i++)
+            {
+                intArray[i] = int.Parse(tokens[i]);
+            }
+            return intArray;
+        }
+
+        private static int[] LoadQueryIds(string queryIdsFilename)
+        {
+            List<int> queryIds = new List<int>();
+            using (StreamReader reader = new StreamReader(queryIdsFilename))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    queryIds.Add(int.Parse(line));
+                }
+            }
+            return queryIds.ToArray();
         }
 
     }

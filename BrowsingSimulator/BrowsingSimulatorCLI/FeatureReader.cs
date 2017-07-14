@@ -60,7 +60,7 @@ namespace DescriptorClusteringCLI
 
         public FeatureReader(string filename, bool loadMetadata = true)
         {
-            reader = new BinaryReader(File.OpenRead(filename));
+            reader = new BinaryReader(File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read));
             this.loadMetadata = loadMetadata;
             ReadHeader();
         }

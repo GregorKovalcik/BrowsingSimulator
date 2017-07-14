@@ -25,6 +25,8 @@ namespace BrowsingSimulator
             BrowsingSessions = 
                 GenerateBrowsingSessions(randomDistinctIds, displaySize, zoomingStep, browsingCoherence, dropFactor, randomSeed);
 
+            Console.WriteLine("Running {0} sessions.", BrowsingSessions.Length);
+
 #if PARALLEL
             Parallel.For(0, BrowsingSessions.Length, index =>
 #else
@@ -43,10 +45,17 @@ namespace BrowsingSimulator
                     do
                     {
                         float itemDistance = session.SelectRandomItemAndGenerateNewDisplay();
+#if VERBOSE
                         Console.WriteLine("Session ID: {0}, browsing depth: {1}, item distance: {2}",
                             session.Id, session.BrowsingDepth, itemDistance);
+#endif
                     } while (session.BrowsingDepth < maxBrowsingDepth && !session.ItemFound);
 
+                    Console.WriteLine("Session ID: {0}, item {1}found after {2} iterations.",
+                                session.Id,
+                                session.ItemFound ? "" : "NOT ",
+                                session.BrowsingDepth);
+                    
                 }
                 catch (Exception ex)
                 {
@@ -93,7 +102,9 @@ namespace BrowsingSimulator
         {
             Directory.CreateDirectory(outputDirectory);
 
-            string sessionFileName = "session_" + session.Id.ToString("000000") + ".log";
+            string sessionFileName = "session_" + session.Id.ToString("000000") 
+                + "_item_" + session.SearchedItem.Id.ToString("000000") 
+                + ".log";
             string sessionFilePath = Path.Combine(outputDirectory, sessionFileName);
             using (StreamWriter writer = new StreamWriter(sessionFilePath))
             {
@@ -140,6 +151,8 @@ namespace BrowsingSimulator
             writer.Write(";");
             writer.Write("selected_item:" + log.SelectedItem.Id.ToString("000000"));
             writer.Write(";");
+            writer.Write("selected_item_drop_probability:" + log.SelectedItemDropProbability.ToString("0.00"));
+            writer.Write(";");
             writer.Write("searched_item_distance:" + log.SearchedItemDistance.ToString("00000000.00"));
             writer.Write(";display:");
 
@@ -157,7 +170,7 @@ namespace BrowsingSimulator
             writer.WriteLine();
         }
 
-        private void ComputeAndPrintBrowsingHistogram(string outputDirectory)
+        private float[] ComputeAndPrintBrowsingHistogram(string outputDirectory)
         {
             Directory.CreateDirectory(outputDirectory);
 
@@ -183,10 +196,10 @@ namespace BrowsingSimulator
                 }
             }
 
-            // write result
-            string fileName = "browsing_histogram.log";
-            string filePath = Path.Combine(outputDirectory, fileName);
-            using (StreamWriter writer = new StreamWriter(filePath))
+            // write histogram
+            string histogramFileName = "browsing_histogram.log";
+            string histogramFilePath = Path.Combine(outputDirectory, histogramFileName);
+            using (StreamWriter writer = new StreamWriter(histogramFilePath))
             {
                 writer.WriteLine(itemFoundCount + "/" + BrowsingSessions.Length);
 
@@ -195,6 +208,23 @@ namespace BrowsingSimulator
                     writer.WriteLine("{0}:{1}", i, histogram[i] / BrowsingSessions.Length);
                 }
             }
+
+            // write cumulative distribution function
+            string distributionFileName = "cumulative_distribution_function.log";
+            string distributionFilePath = Path.Combine(outputDirectory, distributionFileName);
+            float accumulator = 0;
+            using (StreamWriter writer = new StreamWriter(distributionFilePath))
+            {
+                writer.WriteLine(itemFoundCount + "/" + BrowsingSessions.Length);
+
+                for (int i = 0; i < histogram.Length; i++)
+                {
+                    accumulator += histogram[i] / BrowsingSessions.Length;
+                    writer.WriteLine("{0}", accumulator);
+                }
+            }
+
+            return histogram;
         }
 
     }

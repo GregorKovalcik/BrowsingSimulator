@@ -1,14 +1,16 @@
 ﻿//using Alea;
 //using Alea.CSharp;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BrowsingSimulator
 {
-    public class MLES
+    public class MLES : IDisposable
     {
         public Item[] Dataset { get; protected set; }
         public Item[][] Layers { get; protected set; }
@@ -18,8 +20,12 @@ namespace BrowsingSimulator
         //protected float[] distancesGpu;
         //protected object gpuLock = new object();
         //protected LaunchParam launchParam;
-        
-        public MLES(float[][] dataset, Tuple<int, int[]>[][] clusteringLayers)
+
+        protected ConcurrentDictionary<int, Item[]> cache = new ConcurrentDictionary<int, Item[]>();
+        protected string cacheFilename;
+        protected int cachedArrayLength = 1000;
+
+        public MLES(float[][] dataset, Tuple<int, int[]>[][] clusteringLayers, string cacheFilename = null)
         {
             // TODO: check input data
             FillDataset(dataset);
@@ -36,6 +42,9 @@ namespace BrowsingSimulator
             TestLayerParent(Layers[0], 0);
 #endif
             //AllocateGpuMemory();
+
+            this.cacheFilename = cacheFilename;
+            LoadCache();
         }
 
         //protected void AllocateGpuMemory()
@@ -165,47 +174,68 @@ namespace BrowsingSimulator
         public Item[] SearchKNN(Item query, Item[] set, int nResults, 
             Func<int, bool> HasItemDroppedOut, ICollection<Item> alreadyUsedItems)
         {
-            // TODO: cache
-            if (false)
-            {
+            Item[] sortedLayer;
 
+            // load sorted array
+            if (set.Equals(Dataset) && cacheFilename != null && cache.ContainsKey(query.Id))
+            {
+                sortedLayer = cache[query.Id];
+#if VERBOSE
+                Console.WriteLine("== CACHE HIT ==");
+#endif
             }
             else
             {
                 float[] distances;
-                distances = ComputeDistancesDatasetCPU(query, set);
                 //if (set.Equals(Dataset))
                 //{
-                //    //distances = ComputeDistancesDatasetGPU(query);
-                //    distances = ComputeDistancesDatasetCPU(query, Dataset);
+                //    distances = ComputeDistancesDatasetGPU(query);
+                //    //distances = ComputeDistancesDatasetCPU(query, Dataset);
                 //}
                 //else
                 //{
                 //    distances = ComputeDistancesDatasetCPU(query, set);
                 //}
-                Item[] sortedLayer = (Item[])set.Clone();
+                distances = ComputeDistancesDatasetCPU(query, set);
+                sortedLayer = (Item[])set.Clone();
                 Array.Sort(distances, sortedLayer);
 
-                List<Item> results = new List<Item>();
-                foreach (Item item in sortedLayer)
+                if (set.Equals(Dataset) && cacheFilename != null)
                 {
-                    if (!HasItemDroppedOut(item.Id) && !alreadyUsedItems.Contains(item))
+                    try
                     {
-                        results.Add(item);
+                        Item[] cachedArray = new Item[cachedArrayLength];
+                        Array.Copy(sortedLayer, cachedArray, cachedArray.Length);
+                        cache.TryAdd(query.Id, cachedArray);
                     }
+                    catch (OutOfMemoryException ex)
+                    {
+                        cache.Clear();
+                        Console.WriteLine("==== CACHE EMPTIED ====");
+                    }
+                }
+            }
+
+            // filter dropped items
+            List<Item> results = new List<Item>();
+            foreach (Item item in sortedLayer)
+            {
+                if (!HasItemDroppedOut(item.Id) && !alreadyUsedItems.Contains(item))
+                {
+                    results.Add(item);
+                }
 #if VERBOSE
                     else
                     {
                         Console.WriteLine("Item dropped from display: {0}", item.Id);
                     }
 #endif
-                    if (results.Count == nResults)
-                    {
-                        return results.ToArray();
-                    }
+                if (results.Count == nResults)
+                {
+                    return results.ToArray();
                 }
-                return results.ToArray();
             }
+            return results.ToArray();
         }
 
         private static float[] ComputeDistancesDatasetCPU(Item query, Item[] set)
@@ -245,10 +275,10 @@ namespace BrowsingSimulator
 
         //    float[] distancesGpuResult = task.Result;
         //    Array.Copy(distancesGpuResult, distances, distancesGpuResult.Length);
-            
+
         //    return distances;
         //}
-        
+
 
         //public static void ComputeDistancesKernel(float[] query, float[][] datasetGpu, float[] distances, 
         //    Func<float[], float[], float> distanceFunction)
@@ -260,5 +290,64 @@ namespace BrowsingSimulator
         //        distances[i] = distanceFunction(query, datasetGpu[i]);
         //    }
         //}
+
+
+        protected void SaveCache()
+        {
+            if (cacheFilename == null)  // cache disabled
+            {
+                return;
+            }
+
+            Console.WriteLine("Saving MLES cache.");
+            using (BinaryWriter writer = new BinaryWriter(File.Open(cacheFilename, 
+                FileMode.Create, FileAccess.Write, FileShare.None)))
+            {
+                writer.Write(cache.Count);
+                writer.Write(cachedArrayLength);
+
+                foreach (int key in cache.Keys)
+                {
+                    writer.Write(key);
+                    Item[] value = cache[key];
+                    for (int i = 0; i < value.Length; i++)
+                    {
+                        writer.Write(value[i].Id);
+                    }
+                }
+            }
+        }
+
+        protected void LoadCache()
+        {
+            if (cacheFilename == null || !File.Exists(cacheFilename))  // cache disabled
+            {
+                return;
+            }
+
+            Console.WriteLine("Loading MLES cache.");
+            using (BinaryReader reader = new BinaryReader(File.Open(cacheFilename, 
+                FileMode.Open, FileAccess.Read, FileShare.Read)))
+            {
+                int cacheSize = reader.ReadInt32();
+                cachedArrayLength = reader.ReadInt32();
+
+                for (int i = 0; i < cacheSize; i++)
+                {
+                    int key = reader.ReadInt32();
+                    Item[] value = new Item[cachedArrayLength];
+                    for (int j = 0; j < cachedArrayLength; j++)
+                    {
+                        value[j] = Dataset[reader.ReadInt32()];
+                    }
+                    cache.TryAdd(key, value);
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            SaveCache();
+        }
     }
 }
