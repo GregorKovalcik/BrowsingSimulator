@@ -51,7 +51,7 @@ namespace BrowsingSimulator
 #endif
                     } while (session.BrowsingDepth < maxBrowsingDepth && !session.ItemFound);
 
-                    Console.WriteLine("Session ID: {0}, item {1}found after {2} iterations.",
+                    Console.WriteLine("Session ID: {0}, item {1}FOUND after {2} iterations.",
                                 session.Id,
                                 session.ItemFound ? "" : "NOT ",
                                 session.BrowsingDepth);

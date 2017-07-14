@@ -1,5 +1,8 @@
-﻿//using Alea;
-//using Alea.CSharp;
+﻿//#define GPU
+#if GPU
+using Alea;
+using Alea.CSharp;
+#endif
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -14,13 +17,13 @@ namespace BrowsingSimulator
     {
         public Item[] Dataset { get; protected set; }
         public Item[][] Layers { get; protected set; }
-
-        //protected int gpuDatasetSize = 0;
-        //protected float[][] subDatasetGpu;
-        //protected float[] distancesGpu;
-        //protected object gpuLock = new object();
-        //protected LaunchParam launchParam;
-
+#if GPU
+        protected int gpuDatasetSize = 0;
+        protected float[][] subDatasetGpu;
+        protected float[] distancesGpu;
+        protected object gpuLock = new object();
+        protected LaunchParam launchParam;
+#endif
         protected ConcurrentDictionary<int, Item[]> cache = new ConcurrentDictionary<int, Item[]>();
         protected string cacheFilename;
         protected int cachedArrayLength = 1000;
@@ -41,34 +44,35 @@ namespace BrowsingSimulator
             TestLayerParent(Layers[1], 1);
             TestLayerParent(Layers[0], 0);
 #endif
-            //AllocateGpuMemory();
-
+#if GPU
+            AllocateGpuMemory();
+#endif
             this.cacheFilename = cacheFilename;
             LoadCache();
         }
+#if GPU
+        protected void AllocateGpuMemory()
+        {
+            Console.WriteLine("Allocating GPU memory.");
+            ulong maxMemory = Gpu.Default.Device.TotalMemory;
+            int featureDimension = Dataset[0].Descriptor.Length;    // TODO: better solution
 
-        //protected void AllocateGpuMemory()
-        //{
-        //    Console.WriteLine("Allocating GPU memory.");
-        //    ulong maxMemory = Gpu.Default.Device.TotalMemory;
-        //    int featureDimension = Dataset[0].Descriptor.Length;    // TODO: better solution
+            //int distancesGpuSize = sizeof(float) * 340000;          // TODO
+            //gpuDatasetSize = (int)((maxMemory - (ulong)distancesGpuSize) / (ulong)(featureDimension * sizeof(float)));
+            //gpuDatasetSize = (int)(gpuDatasetSize * 0.8);
+            gpuDatasetSize = Dataset.Length;
+            float[][] subDataset = new float[gpuDatasetSize][];
+            for (int i = 0; i < subDataset.Length; i++)
+            {
+                subDataset[i] = Dataset[i].Descriptor;
+            }
+            subDatasetGpu = Gpu.Default.Allocate(subDataset);
+            distancesGpu = Gpu.Default.Allocate<float>(gpuDatasetSize);
 
-        //    int distancesGpuSize = sizeof(float) * 340000;          // TODO
-        //    gpuDatasetSize = (int)((maxMemory - (ulong)distancesGpuSize) / (ulong)(featureDimension * sizeof(float)));
-        //    gpuDatasetSize = (int)(gpuDatasetSize * 0.8);
-
-        //    float[][] subDataset = new float[gpuDatasetSize][];
-        //    for (int i = 0; i < subDataset.Length; i++)
-        //    {
-        //        subDataset[i] = Dataset[i].Descriptor;
-        //    }
-        //    subDatasetGpu = Gpu.Default.Allocate(subDataset);
-        //    //distancesGpu = Gpu.Default.Allocate<float>(gpuDatasetSize);
-
-        //    int blockDim = 512;
-        //    launchParam = new LaunchParam((gpuDatasetSize / blockDim) + 1, blockDim);
-        //}
-
+            int blockDim = 512;
+            launchParam = new LaunchParam((gpuDatasetSize / blockDim) + 1, blockDim);
+        }
+#endif
         protected void FillDataset(float[][] dataset)
         {
             Dataset = new Item[dataset.Length];
@@ -187,16 +191,19 @@ namespace BrowsingSimulator
             else
             {
                 float[] distances;
-                //if (set.Equals(Dataset))
-                //{
-                //    distances = ComputeDistancesDatasetGPU(query);
-                //    //distances = ComputeDistancesDatasetCPU(query, Dataset);
-                //}
-                //else
-                //{
-                //    distances = ComputeDistancesDatasetCPU(query, set);
-                //}
+#if GPU
+                if (set.Equals(Dataset))
+                {
+                    distances = ComputeDistancesDatasetGPU(query);
+                    //distances = ComputeDistancesDatasetCPU(query, Dataset);
+                }
+                else
+                {
+                    distances = ComputeDistancesDatasetCPU(query, set);
+                }
+#else
                 distances = ComputeDistancesDatasetCPU(query, set);
+#endif
                 sortedLayer = (Item[])set.Clone();
                 Array.Sort(distances, sortedLayer);
 
@@ -247,52 +254,52 @@ namespace BrowsingSimulator
             });
             return distances;
         }
+#if GPU
+        private float[] ComputeDistancesDatasetGPU(Item query)
+        {
+            // gpu
+            Task<float[]> task = Task<float[]>.Factory.StartNew(() =>
+            {
+                lock (gpuLock)
+                {
+                    float[] queryGpu = Gpu.Default.Allocate(query.Descriptor);
+                    //float[] distancesGpu = Gpu.Default.Allocate<float>(gpuDatasetSize);
+                    Gpu.Default.Launch<float[], float[][], float[], Func<float[], float[], float>>
+                        (ComputeDistancesKernel, launchParam, queryGpu, subDatasetGpu, distancesGpu, Item.GetDistanceSQR);
+                    Gpu.Free(queryGpu);
+                    float[] distancesGpuResultTask = Gpu.CopyToHost(distancesGpu);
+                    //Gpu.Free(distancesGpu);
+                    return distancesGpuResultTask;
+                }
+            });
 
-        //private float[] ComputeDistancesDatasetGPU(Item query)
-        //{
-        //    // gpu
-        //    Task<float[]> task = Task<float[]>.Factory.StartNew(() =>
-        //    {
-        //        lock (gpuLock)
-        //        {
-        //            float[] queryGpu = Gpu.Default.Allocate(query.Descriptor);
-        //            float[] distancesGpu = Gpu.Default.Allocate<float>(gpuDatasetSize);
-        //            Gpu.Default.Launch<float[], float[][], float[], Func<float[], float[], float>>
-        //                (ComputeDistancesKernel, launchParam, queryGpu, subDatasetGpu, distancesGpu, Item.GetDistanceSQR);
-        //            Gpu.Free(queryGpu);
-        //            float[] distancesGpuResultTask = Gpu.CopyToHost(distancesGpu);
-        //            Gpu.Free(distancesGpu);
-        //            return distancesGpuResultTask;
-        //        }
-        //    });
+            // cpu
+            //float[] distances = new float[Dataset.Length];
+            //Parallel.For(gpuDatasetSize, distances.Length, index =>
+            //{
+            //    distances[index] = Item.GetDistanceSQR(query.Descriptor, Dataset[index].Descriptor);
+            //});
 
-        //    // cpu
-        //    float[] distances = new float[Dataset.Length];
-        //    Parallel.For(gpuDatasetSize, distances.Length, index =>
-        //    {
-        //        distances[index] = Item.GetDistanceSQR(query.Descriptor, Dataset[index].Descriptor);
-        //    });
+            float[] distancesGpuResult = task.Result;
+            //Array.Copy(distancesGpuResult, distances, distancesGpuResult.Length);
 
-        //    float[] distancesGpuResult = task.Result;
-        //    Array.Copy(distancesGpuResult, distances, distancesGpuResult.Length);
-
-        //    return distances;
-        //}
-
-
-        //public static void ComputeDistancesKernel(float[] query, float[][] datasetGpu, float[] distances, 
-        //    Func<float[], float[], float> distanceFunction)
-        //{
-        //    int start = blockIdx.x * blockDim.x + threadIdx.x;
-        //    int stride = gridDim.x * blockDim.x;
-        //    for (int i = start; i < distances.Length; i += stride)
-        //    {
-        //        distances[i] = distanceFunction(query, datasetGpu[i]);
-        //    }
-        //}
+            return distancesGpuResult;
+        }
 
 
-        protected void SaveCache()
+        public static void ComputeDistancesKernel(float[] query, float[][] datasetGpu, float[] distances,
+            Func<float[], float[], float> distanceFunction)
+        {
+            int start = blockIdx.x * blockDim.x + threadIdx.x;
+            int stride = gridDim.x * blockDim.x;
+            for (int i = start; i < distances.Length; i += stride)
+            {
+                distances[i] = distanceFunction(query, datasetGpu[i]);
+            }
+        }
+#endif
+
+        public void SaveCache()
         {
             if (cacheFilename == null)  // cache disabled
             {

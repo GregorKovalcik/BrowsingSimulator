@@ -47,6 +47,7 @@ namespace BrowsingSimulatorCLI
                         string directoryPath = Path.Combine(outputDirectory, directory);
 
                         simulator.SaveSessionLogs(directoryPath);
+                        mles.SaveCache();
                     }
 
             //simulator.RunSimulations(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 24, 1, 1);
@@ -57,8 +58,8 @@ namespace BrowsingSimulatorCLI
 
         private static float[][] LoadDescriptorFile(string descriptorFile)
         {
-            //using (FeatureReader featureReader = new FeatureReader(descriptorFile, false))
-            using (FeatureReader featureReader = new FeatureReader(descriptorFile, true))
+            using (FeatureReader featureReader = new FeatureReader(descriptorFile, false))
+            //using (FeatureReader featureReader = new FeatureReader(descriptorFile, true))
             {
                 Console.WriteLine("Loading {0} descriptors ({1} dimensions).", featureReader.FeatureCount, featureReader.FeatureDimension);
                 float[][] descriptors = new float[featureReader.FeatureCount][];
