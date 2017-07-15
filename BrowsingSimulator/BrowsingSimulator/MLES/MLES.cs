@@ -1,5 +1,4 @@
-﻿//#define GPU
-#if GPU
+﻿#if GPU
 using Alea;
 using Alea.CSharp;
 #endif
@@ -167,7 +166,6 @@ namespace BrowsingSimulator
         {
             return SearchKNN(query, set, nResults, HasItemDroppedOut, new Item[0]);
         }
-
         public Item[] SearchKNN(Item query, int layerId, int nResults, 
             Func<int, bool> HasItemDroppedOut, ICollection<Item> alreadyUsedItems)
         {
@@ -207,6 +205,7 @@ namespace BrowsingSimulator
                 sortedLayer = (Item[])set.Clone();
                 Array.Sort(distances, sortedLayer);
 
+                // cache the sorted array
                 if (set.Equals(Dataset) && cacheFilename != null)
                 {
                     try
@@ -217,6 +216,7 @@ namespace BrowsingSimulator
                     }
                     catch (OutOfMemoryException ex)
                     {
+                        // better drop the cache than crash the simulation
                         cache.Clear();
                         Console.WriteLine("==== CACHE EMPTIED ====");
                     }
@@ -232,10 +232,10 @@ namespace BrowsingSimulator
                     results.Add(item);
                 }
 #if VERBOSE
-                    else
-                    {
-                        Console.WriteLine("Item dropped from display: {0}", item.Id);
-                    }
+                else
+                {
+                    Console.WriteLine("Item dropped from display: {0}", item.Id);
+                }
 #endif
                 if (results.Count == nResults)
                 {

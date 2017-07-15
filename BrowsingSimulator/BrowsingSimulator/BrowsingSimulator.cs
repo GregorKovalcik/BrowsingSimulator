@@ -36,12 +36,13 @@ namespace BrowsingSimulator
                 try
                 {
                     BrowsingSession session = BrowsingSessions[index];
+#if VERBOSE
                     Console.WriteLine("Launching session ID: {0}. Searched item is in {1} -> {2} -> {3}",
                         session.Id,
                         session.SearchedItem.ParentItem.ParentItem.LayerLocalId,
                         session.SearchedItem.ParentItem.LayerLocalId,
                         session.SearchedItem.LayerLocalId);
-
+#endif
                     do
                     {
                         float itemDistance = session.SelectRandomItemAndGenerateNewDisplay();
@@ -51,9 +52,9 @@ namespace BrowsingSimulator
 #endif
                     } while (session.BrowsingDepth < maxBrowsingDepth && !session.ItemFound);
 
-                    Console.WriteLine("Session ID: {0}, item {1}FOUND after {2} iterations.",
-                                session.Id,
-                                session.ItemFound ? "" : "NOT ",
+                    Console.WriteLine("Session ID: {0}, item {1} after {2} iterations.",
+                                session.Id.ToString("00000"),
+                                session.ItemFound ? "**** FOUND ****" : "__ NOT FOUND __",
                                 session.BrowsingDepth);
                     
                 }
@@ -189,7 +190,18 @@ namespace BrowsingSimulator
             int itemFoundCount = 0;
             foreach (BrowsingSession session in BrowsingSessions)
             {
-                histogram[session.BrowsingDepth - 1]++;
+                if (session.BrowsingDepth == histogram.Length)
+                {
+                    if (session.ItemFound)
+                    {
+                        histogram[session.BrowsingDepth - 1]++;
+                    }
+                }
+                else
+                {
+                    histogram[session.BrowsingDepth - 1]++;
+                }
+
                 if (session.ItemFound)
                 {
                     itemFoundCount++;

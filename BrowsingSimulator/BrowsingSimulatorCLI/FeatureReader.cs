@@ -73,9 +73,20 @@ namespace DescriptorClusteringCLI
 
         private void ReadHeader()
         {
+            string magicHeader = new string(reader.ReadChars(16));
+            string headerCheck = "DNN features    ";
+            if (magicHeader.CompareTo(headerCheck) == 0)
+            {
+                loadMetadata = true;
+            }
+            else
+            {
+                loadMetadata = false;
+                reader.BaseStream.Seek(0, SeekOrigin.Begin);
+            }
+
             if (loadMetadata)
             {
-                char[] magicHeader = reader.ReadChars(16);
                 NetworkName = new string(reader.ReadChars(16)).Trim();
                 NetworkLayer = new string(reader.ReadChars(16)).Trim();
 
