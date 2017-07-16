@@ -23,7 +23,7 @@ namespace BrowsingSimulatorCLI
             string queryIdsFile = args[3];
             int[] zoomingSteps = ParseIntArray(args[4]);
             int[] browsingCoherences = ParseIntArray(args[5]);
-            int[] dropFactors = ParseIntArray(args[6]);
+            float[] dropFactors = ParseFloatArray(args[6]);
             string outputDirectory = args[7];
             string cacheFilename = null;
             if (args.Length > 8) { cacheFilename = args[8]; }
@@ -53,8 +53,6 @@ namespace BrowsingSimulatorCLI
             //simulator.RunSimulations(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 24, 1, 1);
             mles.Dispose();
         }
-
-
 
         private static float[][] LoadDescriptorFile(string descriptorFile)
         {
@@ -131,6 +129,18 @@ namespace BrowsingSimulatorCLI
                 intArray[i] = int.Parse(tokens[i]);
             }
             return intArray;
+        }
+
+        private static float[] ParseFloatArray(string commaSeparatedIntArray)
+        {
+            string[] tokens = commaSeparatedIntArray.Split(',');
+            float[] floatArray = new float[tokens.Length];
+
+            for (int i = 0; i < tokens.Length; i++)
+            {
+                floatArray[i] = int.Parse(tokens[i]);
+            }
+            return floatArray;
         }
 
         private static int[] LoadQueryIds(string queryIdsFilename)
