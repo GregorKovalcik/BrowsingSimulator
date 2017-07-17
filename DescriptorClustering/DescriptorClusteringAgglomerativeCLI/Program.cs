@@ -23,8 +23,10 @@ namespace DescriptorClusteringCLI
             {
                 layersToExport.Add(int.Parse(args[i]) - 1); // TODO: try-catch
             }
-            
-            ClusteringAgglomerative clustering = new ClusteringAgglomerative(LoadArrayDescriptors(descriptorFile, clusteringFile));
+
+            Tuple<Descriptor[], int[]> descriptorsWithWeights = LoadArrayDescriptorsAndWeights(descriptorFile, clusteringFile);
+            ClusteringAgglomerative clustering = 
+                new ClusteringAgglomerative(descriptorsWithWeights.Item1, descriptorsWithWeights.Item2);
             clustering.Clusterize(layersToExport);
 
             foreach (Centroid[] layerCentroids in clustering.Centroids)
@@ -38,9 +40,10 @@ namespace DescriptorClusteringCLI
 
 
 
-        private static Descriptor[] LoadArrayDescriptors(string descriptorFile, string clusteringFile)
+        private static Tuple<Descriptor[], int[]> LoadArrayDescriptorsAndWeights(string descriptorFile, string clusteringFile)
         {
             List<int> idsToExtract = new List<int>();
+            List<int> weights = new List<int>();
             using (StreamReader reader = new StreamReader(clusteringFile))
             {
                 string line;
@@ -50,8 +53,10 @@ namespace DescriptorClusteringCLI
                     int clusterId = int.Parse(tokens[0]);
                     int descriptorId = int.Parse(tokens[1]);
                     string descriptors = tokens[2];
-                    
+                    string[] clusterItemsIds = descriptors.Split(';');
+
                     idsToExtract.Add(descriptorId);
+                    weights.Add(clusterItemsIds.Length);
                 }
             }
 
@@ -64,7 +69,7 @@ namespace DescriptorClusteringCLI
                     float[] features = featureReader.GetFeatures(idsToExtract[i]);    // TODO: optimize
                     descriptors[i] = new Descriptor(idsToExtract[i], features);
                 }
-                return descriptors;
+                return new Tuple<Descriptor[], int[]>(descriptors, weights.ToArray());
             }
         }
 

@@ -199,7 +199,8 @@ namespace TestClustering
             int nDescriptorsDiv5 = nDescriptors / 5;
 
             Descriptor[] descriptors = HelperTestClass.GenerateHierarchicalDescriptors(seed, nDescriptorsDiv5, descriptorDimension);
-            ClusteringAgglomerative clustering = new ClusteringAgglomerative(descriptors);
+            ClusteringAgglomerative clustering = 
+                new ClusteringAgglomerative(descriptors, Enumerable.Repeat(1, descriptors.Length).ToArray());
 
             clustering.Clusterize();
             HelperTestClass.TestDescriptorAssignment(descriptors.Length, clustering.Centroids[0]);

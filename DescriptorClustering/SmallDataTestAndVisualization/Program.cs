@@ -34,7 +34,8 @@ namespace SmallDataTestAndVisualization
             //ClusteringSimple clustering = new ClusteringSimple(descriptors);
             //clustering.Clusterize(nClusters, iterationCount, seed);
 
-            ClusteringAgglomerative clustering = new ClusteringAgglomerative(descriptors);
+            ClusteringAgglomerative clustering = 
+                new ClusteringAgglomerative(descriptors, Enumerable.Repeat(1, descriptors.Length).ToArray());
             clustering.Clusterize(new List<int> { 0, 1, 3, 7, 15, 31, 63, 127, 255, 511 });
             //clustering.Clusterize();
 
