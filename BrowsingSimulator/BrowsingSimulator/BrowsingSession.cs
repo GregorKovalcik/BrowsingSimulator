@@ -69,13 +69,14 @@ namespace BrowsingSimulator
             {
                 // zoom
                 LayerDepth++;
-                GenerateNewDisplayZoom(query, LayerDepth, DisplaySize);
+                //GenerateNewDisplayZoom(query, LayerDepth, DisplaySize);
             }
-            else
-            {
-                // pan
-                GenerateNewDisplayPan(query, LayerDepth, DisplaySize);
-            }
+            //else
+            //{
+            //    // pan
+            //    GenerateNewDisplayPan(query, LayerDepth, DisplaySize);
+            //}
+            GenerateNewDisplay(query, LayerDepth, DisplaySize);
 
             BrowsingDepth++;
 
@@ -114,30 +115,44 @@ namespace BrowsingSimulator
             }
         }
 
-
-        protected void GenerateNewDisplayZoom(Item query, int layerId, int nResults)
-        {
-            Display.Clear();
-
-            Item[] zoomItems = Mles.SearchKNN(query, query.ClusterItems, nResults, HasItemDroppedOut);
-            List<Item> displayItems = new List<Item>(zoomItems);
-            LoopAddLayerItems(query, layerId, nResults, displayItems);
-            IncrementDisplayedCount(displayItems);
-
-            Display = displayItems;
-        }
-
-
-        protected void GenerateNewDisplayPan(Item query, int layerId, int nResults)
+        protected void GenerateNewDisplay(Item query, int layerId, int nResults)
         {
             Display.Clear();
 
             List<Item> displayItems = new List<Item>();
-            LoopAddLayerItems(query, layerId, nResults, displayItems);
+            displayItems.AddRange(Mles.SearchKNN(query, layerId, nResults, HasItemDroppedOut, displayItems));
+            if (displayItems.Count < nResults)
+            {
+                throw new NotImplementedException("Display was not filled completely!");
+            }
+            
             IncrementDisplayedCount(displayItems);
-
             Display = displayItems;
         }
+
+        //protected void GenerateNewDisplayZoom(Item query, int layerId, int nResults)
+        //{
+        //    Display.Clear();
+
+        //    Item[] zoomItems = Mles.SearchKNN(query, query.ClusterItems, nResults, HasItemDroppedOut);
+        //    List<Item> displayItems = new List<Item>(zoomItems);
+        //    LoopAddLayerItems(query, layerId, nResults, displayItems);
+        //    IncrementDisplayedCount(displayItems);
+
+        //    Display = displayItems;
+        //}
+
+
+        //protected void GenerateNewDisplayPan(Item query, int layerId, int nResults)
+        //{
+        //    Display.Clear();
+
+        //    List<Item> displayItems = new List<Item>();
+        //    LoopAddLayerItems(query, layerId, nResults, displayItems);
+        //    IncrementDisplayedCount(displayItems);
+
+        //    Display = displayItems;
+        //}
 
 
         protected void IncrementDisplayedCount(IEnumerable<Item> displayItems)
