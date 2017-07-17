@@ -31,8 +31,8 @@ namespace DescriptorClusteringCLI
 
             foreach (Centroid[] layerCentroids in clustering.Centroids)
             {
-                string filename = Path.GetFileNameWithoutExtension(outputFile) + "_" + layerCentroids.Length 
-                    + Path.GetExtension(outputFile);
+                string filename = Path.Combine(Path.GetDirectoryName(outputFile), Path.GetFileNameWithoutExtension(outputFile)) 
+                    + "_" + layerCentroids.Length + Path.GetExtension(outputFile);
 
                 WriteToTextFile(layerCentroids, filename);
             }

@@ -70,13 +70,14 @@ namespace DescriptorClustering.Hierarchical.Divisive
                 Console.WriteLine("{0}:", c.Mean.Id);
             }
 #endif
-
+            int expectedLayerClusterCount = layerSeedCounts[0];
             // run clustering for each other layer
             for (int iLayer = 1; iLayer < layerCount; iLayer++)
             {
 #if VERBOSE
                 Console.WriteLine("Computing clusters for layer ID: {0}", iLayer);
 #endif
+                expectedLayerClusterCount *= layerSeedCounts[iLayer];
                 List<Centroid> lowerLayerCentroids = new List<Centroid>();
                 int layerClusterId = 0;
                 foreach (Centroid higherLayerCentroid in hierarchicalClusters[iLayer - 1])
@@ -84,9 +85,11 @@ namespace DescriptorClustering.Hierarchical.Divisive
                     Descriptor[] centroidDescriptors = higherLayerCentroid.Descriptors.ToArray();
 
                     clusteringSimple = new ClusteringSimple(centroidDescriptors);
-                    int seedCount = (layerSeedCounts[iLayer] <= centroidDescriptors.Length) 
-                        ? layerSeedCounts[iLayer] 
-                        : centroidDescriptors.Length;
+                    int seedCount = (int)(centroidDescriptors.Length / (Descriptors.Length * 1.0 / expectedLayerClusterCount));
+                    seedCount = (seedCount > 0) ? seedCount : 1;
+                    //int seedCount = (layerSeedCounts[iLayer] <= centroidDescriptors.Length)
+                    //    ? layerSeedCounts[iLayer]
+                    //    : centroidDescriptors.Length;
 #if VERBOSE
                     Console.WriteLine("Clusterization of {0} seeds, {1} iterations.", seedCount, iterationCounts[iLayer]);
 #endif
