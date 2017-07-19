@@ -1,0 +1,74 @@
+﻿<Window x:Class="BrowsingCacheViewerApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrowsingCacheViewerApp"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="720" Width="1280">
+    <Grid x:Name="MainGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid x:Name="MenuGrid" Background="Silver" Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" MinWidth="50" />
+            </Grid.ColumnDefinitions>
+
+            <Button Name="LoadCacheFileButton" 
+                    Content="Load cache file" Grid.Row="0" Grid.Column="0" Click="LoadCacheFileButton_Click" />
+            <TextBox Name="LoadedCacheFileTextBox" 
+                     HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"></TextBox>
+
+            <Button Name="LoadThumbnailsFileButton" 
+                    Content="Load thumbnails file" Grid.Row="1" Grid.Column="0" Click="LoadThumbnailsFileButton_Click"/>
+            <TextBox Name="LoadedThumbnailsFileTextBox" 
+                     HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1"></TextBox>
+
+            <Button Name="ShowItemButton" 
+                    Content="Show item" Grid.Row="0" Grid.Column="2" Click="ShowItemButton_Click"/>
+            <TextBox Name="DisplayIdTextBox" 
+                HorizontalAlignment="Stretch" 
+                VerticalAlignment="Center" 
+                TextAlignment="Center"
+                Grid.Row="0" Grid.Column="3"
+                PreviewKeyDown="DisplayIdTextBox_PreviewKeyDown"
+                TextChanged="DisplayIdTextBox_TextChanged">0</TextBox>
+
+            <Button Name="MaxItemsButton" 
+                    Content="Show item" Grid.Row="1" Grid.Column="2" Click="ShowItemButton_Click"/>
+            <TextBox Name="MaxItemsTextBox" 
+                HorizontalAlignment="Stretch" 
+                VerticalAlignment="Center" 
+                TextAlignment="Center"
+                Grid.Row="1" Grid.Column="3"
+                PreviewKeyDown="MaxItemsTextBox_PreviewKeyDown"
+                TextChanged="MaxItemsTextBox_TextChanged">100</TextBox>
+
+        </Grid>
+
+        <ScrollViewer Grid.Row="1">
+
+            <ItemsControl ItemsSource="{Binding Thumbnails}" Margin="5" >
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Image Source="{Binding Image}" Width="128" Height="96"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</Window>

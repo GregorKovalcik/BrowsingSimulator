@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomSubsequenceGenerator"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SessionLogViewerApp", "SessionLogViewerApp\SessionLogViewerApp.csproj", "{772FD34C-BBB9-4042-B88D-9B7F319F5A8C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowsingCacheViewerApp", "BrowsingCacheViewerApp\BrowsingCacheViewerApp.csproj", "{94E37BA2-A141-499F-AEA3-B19C9822C200}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -45,6 +47,12 @@ Global
 		{772FD34C-BBB9-4042-B88D-9B7F319F5A8C}.Release|x64.Build.0 = Release|x64
 		{772FD34C-BBB9-4042-B88D-9B7F319F5A8C}.ReleaseGPU|x64.ActiveCfg = ReleaseGPU|x64
 		{772FD34C-BBB9-4042-B88D-9B7F319F5A8C}.ReleaseGPU|x64.Build.0 = ReleaseGPU|x64
+		{94E37BA2-A141-499F-AEA3-B19C9822C200}.Debug|x64.ActiveCfg = Debug|x64
+		{94E37BA2-A141-499F-AEA3-B19C9822C200}.Debug|x64.Build.0 = Debug|x64
+		{94E37BA2-A141-499F-AEA3-B19C9822C200}.Release|x64.ActiveCfg = Release|x64
+		{94E37BA2-A141-499F-AEA3-B19C9822C200}.Release|x64.Build.0 = Release|x64
+		{94E37BA2-A141-499F-AEA3-B19C9822C200}.ReleaseGPU|x64.ActiveCfg = Release|x64
+		{94E37BA2-A141-499F-AEA3-B19C9822C200}.ReleaseGPU|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

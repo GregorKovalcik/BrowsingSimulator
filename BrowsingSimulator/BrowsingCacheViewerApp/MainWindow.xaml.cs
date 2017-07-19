@@ -17,7 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace SessionLogViewerApp
+namespace BrowsingCacheViewerApp
 {
     public class Thumbnail
     {
@@ -31,18 +31,19 @@ namespace SessionLogViewerApp
         }
     }
 
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
         public ObservableCollection<Thumbnail> Thumbnails { get; set; }
-        public string LoadedBrowsingLogFile { get; set; }
+        public string LoadedCacheFile { get; set; }
         public string LoadedThumbnailsFile { get; set; }
         public int DisplayId { get; set; }
         private BitmapReader.BitmapReader bitmapReader = null;
-        private int searchedItemId = -1;
-        private Tuple<int, int[]>[] log = null;
+        private Tuple<int, int[]>[] cachedItems = null;
+
 
         public MainWindow()
         {
@@ -74,6 +75,7 @@ namespace SessionLogViewerApp
             DataContext = this;
         }
 
+
         BitmapImage BitmapToImageSource(Bitmap bitmap)
         {
             using (MemoryStream memory = new MemoryStream())
@@ -90,53 +92,55 @@ namespace SessionLogViewerApp
             }
         }
 
-        private void LoadBrowsingLogFile(string fileName)
+        
+        private void LoadCacheFile(string cacheFilename)
         {
-            List<Tuple<int, int[]>> result = new List<Tuple<int, int[]>>();
-            using (StreamReader reader = new StreamReader(fileName))
+            if (cacheFilename == null || !File.Exists(cacheFilename))  // cache disabled
             {
-                string headerLine = reader.ReadLine();
+                return;
+            }
 
-                string[] headerTokens = headerLine.Split(';');
-                searchedItemId = int.Parse(headerTokens[6].Split(':')[1]);
+            List<Tuple<int, int[]>> items = new List<Tuple<int, int[]>>();
+            using (BinaryReader reader = new BinaryReader(File.Open(cacheFilename,
+                FileMode.Open, FileAccess.Read, FileShare.Read)))
+            {
+                int cacheSize = reader.ReadInt32();
+                int cachedArrayLength = reader.ReadInt32();
 
-                string line;
-                while ((line = reader.ReadLine()) != null)
+                for (int i = 0; i < cacheSize; i++)
                 {
-                    string[] tokens = line.Split(';');
-
-                    int selectedItemId = int.Parse(tokens[3].Split(':')[1]);
-                    string[] displayTokens = tokens[6].Split(':');
-                    int[] displayedIds = new int[displayTokens.Length - 1];
-                    for (int i = 1; i < displayTokens.Length; i++)
+                    int key = reader.ReadInt32();
+                    int[] values = new int[cachedArrayLength];
+                    for (int j = 0; j < cachedArrayLength; j++)
                     {
-                        displayedIds[i - 1] = int.Parse(displayTokens[i]);
+                        values[j] = reader.ReadInt32();
                     }
-                    result.Add(new Tuple<int, int[]>(selectedItemId, displayedIds));
+                    items.Add(new Tuple<int, int[]>(key, values));
                 }
             }
-            log = result.ToArray();
+            cachedItems = items.ToArray();
         }
 
-        private void LoadLogFileButton_Click(object sender, RoutedEventArgs e)
+        private void LoadCacheFileButton_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             if (openFileDialog.ShowDialog() == true)
             {
                 try
                 {
-                    LoadedBrowsingLogFileTextBox.Text = "Loading...";
-                    LoadBrowsingLogFile(openFileDialog.FileName);
-                    LoadedBrowsingLogFileTextBox.Text = openFileDialog.FileName;
+                    LoadedCacheFileTextBox.Text = "Loading...";
+                    LoadCacheFile(openFileDialog.FileName);
+                    LoadedCacheFileTextBox.Text = openFileDialog.FileName;
                 }
                 catch
                 {
-                    MessageBox.Show("Unable to load browsing log file!");
-                    LoadedBrowsingLogFileTextBox.Text = "";
+                    MessageBox.Show("Unable to load cache file!");
+                    LoadedCacheFileTextBox.Text = "";
+                    cachedItems = null;
                 }
             }
             DisplayIdTextBox.Text = 0.ToString();
-            ShowDisplay(0);
+            ShowItem(0);
         }
 
         private void LoadThumbnailsFileButton_Click(object sender, RoutedEventArgs e)
@@ -158,88 +162,83 @@ namespace SessionLogViewerApp
                 }
             }
             DisplayIdTextBox.Text = 0.ToString();
-            ShowDisplay(0);
+            ShowItem(0);
         }
 
-        private void ShowDisplay(int displayId)
-        {
-            if (bitmapReader != null && log != null)
-            {
-                Thumbnails.Clear();
 
-                Bitmap bitmap = bitmapReader.ReadFrame(searchedItemId);
-                MarkImage(bitmap, System.Drawing.Color.Red);
-                Thumbnails.Add(new Thumbnail(searchedItemId.ToString(), BitmapToImageSource(bitmap)));
-
-                int selectedItemId = log[displayId].Item1;
-                int[] displayedItems = log[displayId].Item2;
-                foreach (int displayedId in displayedItems)
-                {
-                    // TODO verbose (videoID, shotID...)
-                    bitmap = bitmapReader.ReadFrame(displayedId);
-                    if (selectedItemId == displayedId) { MarkImage(bitmap, System.Drawing.Color.Yellow); }
-                    Thumbnails.Add(new Thumbnail(displayedId.ToString(), BitmapToImageSource(bitmap)));
-                }
-            }
-        }
-
-        private void MarkImage(Bitmap bitmap, System.Drawing.Color color)
-        {
-            using (Graphics g = Graphics.FromImage(bitmap))
-            {
-                System.Drawing.Pen pen = new System.Drawing.Pen(color);
-                pen.Width = 5;
-                g.DrawRectangle(pen, new System.Drawing.Rectangle(0, 0, bitmap.Width - 1, bitmap.Height - 1));
-            }
-        }
-
-        private void ShowDisplayButton_Click(object sender, RoutedEventArgs e)
+        private void ShowItemButton_Click(object sender, RoutedEventArgs e)
         {
             if (bitmapReader == null)
             {
                 MessageBox.Show("No thumbnail file is loaded!");
                 return;
             }
-            if (log == null)
+            if (cachedItems == null)
             {
-                MessageBox.Show("No browsing log file is loaded!");
+                MessageBox.Show("No cache file is loaded!");
                 return;
             }
 
-            int displayId = -1;
+            int itemId = -1;
             try
             {
-                displayId = int.Parse(DisplayIdTextBox.Text);
+                itemId = int.Parse(DisplayIdTextBox.Text);
             }
             catch
             {
-                MessageBox.Show("Unable to decode display ID: " + DisplayIdTextBox.Text);
+                MessageBox.Show("Unable to decode item ID: " + DisplayIdTextBox.Text);
                 return;
             }
 
-            if (displayId >= log.Length || displayId < 0)
+            if (itemId >= cachedItems.Length || itemId < 0)
             {
-                MessageBox.Show("Display ID: " + displayId + " out of range! Correct range is [0, " + (log.Length - 1) + "].");
+                MessageBox.Show("Display ID: " + itemId + " out of range! Correct range is [0, " + (cachedItems.Length - 1) + "].");
                 return;
             }
 
-            ShowDisplay(displayId);
-        }        
-
-        private void DisplayIdTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            int clusterId = -1;
-            try
-            {
-                clusterId = int.Parse(DisplayIdTextBox.Text);
-            }
-            catch
-            {
-                DisplayIdTextBox.Text = 0.ToString();
-                clusterId = 0;
-            }
-            ShowDisplay(clusterId);
+            ShowItem(itemId);
         }
+
+        private void ShowItem(int itemId)
+        {
+            if (bitmapReader != null && cachedItems != null)
+            {
+                Thumbnails.Clear();
+                Tuple<int, int[]> item = cachedItems[itemId];
+                int queryId = item.Item1;
+                int[] displayedItems = item.Item2;
+
+                Bitmap bitmap = bitmapReader.ReadFrame(queryId);
+                MarkSelectedItem(bitmap);
+                Thumbnails.Add(new Thumbnail(queryId.ToString(), BitmapToImageSource(bitmap)));
+
+                foreach (int displayedId in displayedItems)
+                {
+                    // TODO verbose (videoID, shotID...)
+                    bitmap = bitmapReader.ReadFrame(displayedId);
+                    Thumbnails.Add(new Thumbnail(displayedId.ToString(), BitmapToImageSource(bitmap)));
+
+                    if (Thumbnails.Count > int.Parse(MaxItemsTextBox.Text))
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
+
+
+        private void MarkSelectedItem(Bitmap bitmap)
+        {
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                System.Drawing.Color color = System.Drawing.Color.Yellow;
+                System.Drawing.Pen pen = new System.Drawing.Pen(color);
+                pen.Width = 5;
+                g.DrawRectangle(pen, new System.Drawing.Rectangle(0, 0, bitmap.Width - 1, bitmap.Height - 1));
+            }
+        }
+
 
         private void ModifyNumber(TextBox numberTextBox, Func<int, int> modifier)
         {
@@ -259,11 +258,11 @@ namespace SessionLogViewerApp
 
         private void DisplayIdTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (log != null)
+            if (cachedItems != null)
             {
                 if (e.Key == Key.Up)
                 {
-                    ModifyNumber(DisplayIdTextBox, x => (x + 1 < log.Length) ? x + 1 : log.Length - 1);
+                    ModifyNumber(DisplayIdTextBox, x => (x + 1 < cachedItems.Length) ? x + 1 : cachedItems.Length - 1);
                 }
 
                 else if (e.Key == Key.Down)
@@ -271,6 +270,31 @@ namespace SessionLogViewerApp
                     ModifyNumber(DisplayIdTextBox, x => (x - 1 >= 0) ? x - 1 : 0);
                 }
             }
+        }
+
+        private void DisplayIdTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            int clusterId = -1;
+            try
+            {
+                clusterId = int.Parse(DisplayIdTextBox.Text);
+            }
+            catch
+            {
+                DisplayIdTextBox.Text = 0.ToString();
+                clusterId = 0;
+            }
+            ShowItem(clusterId);
+        }
+
+        private void MaxItemsTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void MaxItemsTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
         }
     }
 }

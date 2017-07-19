@@ -1,4 +1,6 @@
-﻿#define PARALLEL
+﻿#if !DEBUG
+#define PARALLEL
+#endif
 
 using System;
 using System.Collections.Generic;
