@@ -58,10 +58,9 @@ namespace DescriptorClusteringCLI
         public int[] FeatureToFrameId { get; private set; }
 
 
-        public FeatureReader(string filename, bool loadMetadata = true)
+        public FeatureReader(string filename)
         {
             reader = new BinaryReader(File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read));
-            this.loadMetadata = loadMetadata;
             ReadHeader();
         }
 

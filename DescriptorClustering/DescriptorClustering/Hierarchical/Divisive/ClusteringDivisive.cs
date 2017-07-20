@@ -11,8 +11,11 @@ namespace DescriptorClustering.Hierarchical.Divisive
 {
     public class ClusteringDivisive : ClusteringHierarchicalBase
     {
-        public ClusteringDivisive(Descriptor[] descriptors) : base(descriptors)
+        protected bool doAdaptiveClustering;
+
+        public ClusteringDivisive(Descriptor[] descriptors, bool doAdaptiveClustering = false) : base(descriptors)
         {
+            this.doAdaptiveClustering = doAdaptiveClustering;
         }
         
 
@@ -85,11 +88,18 @@ namespace DescriptorClustering.Hierarchical.Divisive
                     Descriptor[] centroidDescriptors = higherLayerCentroid.Descriptors.ToArray();
 
                     clusteringSimple = new ClusteringSimple(centroidDescriptors);
-                    int seedCount = (int)(centroidDescriptors.Length / (Descriptors.Length * 1.0 / expectedLayerClusterCount));
-                    seedCount = (seedCount > 0) ? seedCount : 1;
-                    //int seedCount = (layerSeedCounts[iLayer] <= centroidDescriptors.Length)
-                    //    ? layerSeedCounts[iLayer]
-                    //    : centroidDescriptors.Length;
+                    int seedCount;
+                    if (doAdaptiveClustering)
+                    {
+                        seedCount = (int)(centroidDescriptors.Length / (Descriptors.Length * 1.0 / expectedLayerClusterCount));
+                        seedCount = (seedCount > 0) ? seedCount : 1;
+                    }
+                    else
+                    {
+                        seedCount = (layerSeedCounts[iLayer] <= centroidDescriptors.Length)
+                        ? layerSeedCounts[iLayer]
+                        : centroidDescriptors.Length;
+                    }
 #if VERBOSE
                     Console.WriteLine("Clusterization of {0} seeds, {1} iterations.", seedCount, iterationCounts[iLayer]);
 #endif

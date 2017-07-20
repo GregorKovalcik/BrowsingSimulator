@@ -56,7 +56,7 @@ namespace BrowsingSimulatorCLI
 
         private static float[][] LoadDescriptorFile(string descriptorFile)
         {
-            using (FeatureReader featureReader = new FeatureReader(descriptorFile, false))
+            using (FeatureReader featureReader = new FeatureReader(descriptorFile))
             //using (FeatureReader featureReader = new FeatureReader(descriptorFile, true))
             {
                 Console.WriteLine("Loading {0} descriptors ({1} dimensions).", featureReader.FeatureCount, featureReader.FeatureDimension);
