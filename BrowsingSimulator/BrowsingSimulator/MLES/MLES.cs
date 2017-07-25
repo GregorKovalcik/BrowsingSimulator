@@ -32,16 +32,24 @@ namespace BrowsingSimulator
             // TODO: check input data
             FillDataset(dataset);
 
-#if DEBUG
-            TestLayerChildrenCount(clusteringLayers[1], dataset.Length);
-            TestLayerChildrenCount(clusteringLayers[0], clusteringLayers[1].Length);
+#if TEST
+            for (int i = 0; i < clusteringLayers.Length - 1; i++)
+            {
+                TestLayerChildrenCount(clusteringLayers[i], clusteringLayers[i + 1].Length);
+            }
+            //TestLayerChildrenCount(clusteringLayers[1], dataset.Length);
+            //TestLayerChildrenCount(clusteringLayers[0], clusteringLayers[1].Length);
 #endif
 
             FillLayers(clusteringLayers);
-#if DEBUG
-            TestLayerParent(Layers[2], 2);
-            TestLayerParent(Layers[1], 1);
-            TestLayerParent(Layers[0], 0);
+#if TEST
+            for (int i = 0; i < clusteringLayers.Length; i++)
+            {
+                TestLayerParent(Layers[i], i);
+            }
+            //TestLayerParent(Layers[2], 2);
+            //TestLayerParent(Layers[1], 1);
+            //TestLayerParent(Layers[0], 0);
 #endif
 #if GPU
             AllocateGpuMemory();
@@ -100,29 +108,30 @@ namespace BrowsingSimulator
                     int globalId = clusterization[iLayerCluster].Item1;
                     float[] descriptor = Dataset[globalId].Descriptor;
 
-                    // assigne bottom layer subclusters
-                    int[] clusterItemIds = clusterization[iLayerCluster].Item2;
-                    Item[] clusterItems = new Item[clusterItemIds.Length];
-                    Item[] bottomLayer = Layers[iLayer + 1];
-                    for (int iClusterItem = 0; iClusterItem < clusterItemIds.Length; iClusterItem++)
-                    {
-                        int clusterItemId = clusterItemIds[iClusterItem];
-                        if (iLayer == Layers.Length - 2)
-                        {
-                            // no need to do an expensive search in the last layer
-                            clusterItems[iClusterItem] = Dataset[clusterItemId];
-                        }
-                        else
-                        {
-                            // expensive search in other layers
-                            clusterItems[iClusterItem] = bottomLayer.Where(item => item.Id == clusterItemId).First();
-                        }
-                    }
-                    Layers[iLayer][iLayerCluster] = new Item(globalId, iLayerCluster, descriptor, clusterItems);
-                    foreach (Item item in clusterItems)
-                    {
-                        item.SetParentItem(Layers[iLayer][iLayerCluster]);
-                    }
+                    // assign bottom layer subclusters
+                    //int[] clusterItemIds = clusterization[iLayerCluster].Item2;
+                    //Item[] clusterItems = new Item[clusterItemIds.Length];
+                    //Item[] bottomLayer = Layers[iLayer + 1];
+                    //for (int iClusterItem = 0; iClusterItem < clusterItemIds.Length; iClusterItem++)
+                    //{
+                    //    int clusterItemId = clusterItemIds[iClusterItem];
+                    //    if (iLayer == Layers.Length - 2)
+                    //    {
+                    //        // no need to do an expensive search in the last layer
+                    //        clusterItems[iClusterItem] = Dataset[clusterItemId];
+                    //    }
+                    //    else
+                    //    {
+                    //        // expensive search in other layers
+                    //        clusterItems[iClusterItem] = bottomLayer.Where(item => item.Id == clusterItemId).First();
+                    //    }
+                    //}
+                    //Layers[iLayer][iLayerCluster] = new Item(globalId, iLayerCluster, descriptor, clusterItems);
+                    Layers[iLayer][iLayerCluster] = new Item(globalId, iLayerCluster, descriptor, null);
+                    //foreach (Item item in clusterItems)
+                    //{
+                    //    item.SetParentItem(Layers[iLayer][iLayerCluster]);
+                    //}
                 }
             }
         }

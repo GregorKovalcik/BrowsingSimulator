@@ -136,10 +136,11 @@ namespace BrowsingSimulator
             writer.Write(";");
             writer.Write("searched_item:" + session.SearchedItem.Id.ToString("000000"));
             writer.Write(";");
-            writer.Write("mles_path:" 
-                + session.SearchedItem.ParentItem.ParentItem.LayerLocalId + "->"
-                + session.SearchedItem.ParentItem.LayerLocalId + "->"
-                + session.SearchedItem.LayerLocalId);
+            writer.Write("mles_path:"
+                //+ session.SearchedItem.ParentItem.ParentItem.LayerLocalId + "->"
+                //+ session.SearchedItem.ParentItem.LayerLocalId + "->"
+                //+ session.SearchedItem.LayerLocalId);
+                + " DISABLED");
 
             writer.WriteLine();
         }

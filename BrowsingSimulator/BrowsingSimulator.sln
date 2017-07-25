@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SessionLogViewerApp", "Sess
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowsingCacheViewerApp", "BrowsingCacheViewerApp\BrowsingCacheViewerApp.csproj", "{94E37BA2-A141-499F-AEA3-B19C9822C200}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowsingComparer", "BrowsingComparer\BrowsingComparer.csproj", "{4DFB590F-D417-4C15-8EDB-78B2FD6A1BD6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -53,6 +55,12 @@ Global
 		{94E37BA2-A141-499F-AEA3-B19C9822C200}.Release|x64.Build.0 = Release|x64
 		{94E37BA2-A141-499F-AEA3-B19C9822C200}.ReleaseGPU|x64.ActiveCfg = Release|x64
 		{94E37BA2-A141-499F-AEA3-B19C9822C200}.ReleaseGPU|x64.Build.0 = Release|x64
+		{4DFB590F-D417-4C15-8EDB-78B2FD6A1BD6}.Debug|x64.ActiveCfg = Debug|x64
+		{4DFB590F-D417-4C15-8EDB-78B2FD6A1BD6}.Debug|x64.Build.0 = Debug|x64
+		{4DFB590F-D417-4C15-8EDB-78B2FD6A1BD6}.Release|x64.ActiveCfg = Release|x64
+		{4DFB590F-D417-4C15-8EDB-78B2FD6A1BD6}.Release|x64.Build.0 = Release|x64
+		{4DFB590F-D417-4C15-8EDB-78B2FD6A1BD6}.ReleaseGPU|x64.ActiveCfg = Release|x64
+		{4DFB590F-D417-4C15-8EDB-78B2FD6A1BD6}.ReleaseGPU|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

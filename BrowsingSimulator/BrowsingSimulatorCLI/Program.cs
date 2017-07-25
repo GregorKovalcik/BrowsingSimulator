@@ -18,18 +18,28 @@ namespace BrowsingSimulatorCLI
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
 
             string descriptorFile = args[0];
-            string clusteringFileL0 = args[1];
-            string clusteringFileL1 = args[2];
-            string queryIdsFile = args[3];
-            int[] zoomingSteps = ParseIntArray(args[4]);
-            int[] browsingCoherences = ParseIntArray(args[5]);
-            float[] dropFactors = ParseFloatArray(args[6]);
-            string outputDirectory = args[7];
+            string queryIdsFile = args[1];
+            int[] zoomingSteps = ParseIntArray(args[2]);
+            int[] browsingCoherences = ParseIntArray(args[3]);
+            float[] dropFactors = ParseFloatArray(args[4]);
+            string outputDirectory = args[5];
             string cacheFilename = null;
-            if (args.Length > 8) { cacheFilename = args[8]; }
-            
+
+            cacheFilename = args[6];
+
+            List<string> mlesLayers = new List<string>();
+            for (int i = 7; i < args.Length; i++)
+            {
+                mlesLayers.Add(args[i]);
+            }
+
+
             float[][] descriptors = LoadDescriptorFile(descriptorFile);
-            Tuple<int, int[]>[][] clustering = Load3LayerClusteringFiles(clusteringFileL0, clusteringFileL1);
+            //Tuple<int, int[]>[][] clustering = Load3LayerClusteringFiles(clusteringFileL0, clusteringFileL1);
+
+            Tuple<int, int[]>[][] clustering = LoadMlesLayers(mlesLayers);
+
+
             int[] queryIds = LoadQueryIds(queryIdsFile);
             MLES mles = new MLES(descriptors, clustering, cacheFilename);
             BrowsingSimulatorEngine simulator = new BrowsingSimulatorEngine(mles);
@@ -68,6 +78,7 @@ namespace BrowsingSimulatorCLI
                 return descriptors;
             }
         }
+
 
         private static Tuple<int, int[]>[][] Load3LayerClusteringFiles(string clusteringFileL0, string clusteringFileL1)
         {
@@ -118,6 +129,41 @@ namespace BrowsingSimulatorCLI
 
             return result;
         }
+
+
+        private static Tuple<int, int[]>[][] LoadMlesLayers(List<string> mlesLayers)
+        {
+            Tuple<int, int[]>[][] result = new Tuple<int, int[]>[mlesLayers.Count][];
+
+            for (int iLayer = 0; iLayer < mlesLayers.Count; iLayer++)
+            {
+                using (StreamReader reader = new StreamReader(mlesLayers[iLayer]))
+                {
+                    List<Tuple<int, int[]>> resultLayer = new List<Tuple<int, int[]>>();
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        string[] tokens = line.Split(':');
+                        int clusterId = int.Parse(tokens[0]);
+                        int descriptorId = int.Parse(tokens[1]);
+                        string clusterItems = tokens[2];
+
+                        tokens = clusterItems.Split(';');
+                        int[] clusterItemIds = new int[tokens.Length];
+                        for (int i = 0; i < tokens.Length; i++)
+                        {
+                            clusterItemIds[i] = int.Parse(tokens[i]);
+                        }
+                        resultLayer.Add(new Tuple<int, int[]>(descriptorId, clusterItemIds));
+                    }
+                    result[iLayer] = resultLayer.ToArray();
+                }
+            }
+
+            return result;
+        }
+
+
 
         private static int[] ParseIntArray(string commaSeparatedIntArray)
         {

@@ -43,7 +43,7 @@ namespace DescriptorClusteringCLI
             //Descriptor[] descriptors = HelperTestClass.GenerateHierarchicalDescriptors(seed, 10000, 2);
             //seedCounts = new int[] { 10, 10 };
 
-            ClusteringDivisive clustering = new ClusteringDivisive(descriptors);
+            ClusteringDivisive clustering = new ClusteringDivisive(descriptors, true);
             Console.WriteLine("Launching clusterization.");
 
             Stopwatch stopWatch = new Stopwatch();
@@ -67,6 +67,8 @@ namespace DescriptorClusteringCLI
             //HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids, imageSize * 2, imageSize * 2);
             //HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids, imageSize * 4, imageSize * 4);
             //HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids, imageSize * 8, imageSize * 8);
+
+            System.Media.SystemSounds.Asterisk.Play();
         }
 
         private static Descriptor[] LoadArrayDescriptors(string descriptorFile)

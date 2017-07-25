@@ -1,4 +1,5 @@
 ﻿#define PARALLEL
+//#define VERBOSE
 
 using System;
 using System.Collections.Generic;
@@ -45,8 +46,8 @@ namespace DescriptorClustering.Simple
                 closestCentroid.AddDescriptorConcurrent(descriptor);
                 descriptor.Centroid = closestCentroid;
 
-#if DEBUG
-                //Console.WriteLine("Descriptor {0} assigned to cluster: {1}", descriptor.Id, closestCentroid.Id);
+#if VERBOSE
+                Console.WriteLine("Descriptor {0} assigned to cluster: {1}", descriptor.Id, closestCentroid.Id);
 #endif
             }
 #if PARALLEL

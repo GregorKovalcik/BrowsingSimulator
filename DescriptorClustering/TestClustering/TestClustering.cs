@@ -14,7 +14,7 @@ namespace TestClustering
     public class TestClustering
     {
         static int seed = 5334;
-        static int windowSize = 720;
+        static int windowSize = 1024;
         static int nDescriptors = 10000;
         static int descriptorDimension = 2;
         static int nClusters = 100;
@@ -139,7 +139,7 @@ namespace TestClustering
             int[] seedCounts = new int[] { 10, 100 };
             int[] iterationCounts = new int[] { 10, 10 };
 
-            ClusteringDivisive clustering = new ClusteringDivisive(descriptors);
+            ClusteringDivisive clustering = new ClusteringDivisive(descriptors, true);
 
             clustering.Clusterize(seedCounts, iterationCounts, seed);
             HelperTestClass.VisualizeClustering(clustering.Descriptors, clustering.Centroids, windowSize, windowSize);
