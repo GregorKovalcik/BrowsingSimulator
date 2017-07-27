@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowsingComparer", "Browsin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomClassItemPick", "RandomClassItemPick\RandomClassItemPick.csproj", "{699D4849-4E9A-463F-97EB-D60FF211B03F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerateClassMappingFile", "GenerateClassMappingFile\GenerateClassMappingFile.csproj", "{4E8D884E-7181-4035-8297-555494F3F5BC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,6 +100,18 @@ Global
 		{699D4849-4E9A-463F-97EB-D60FF211B03F}.ReleaseGPU|Any CPU.Build.0 = Release|Any CPU
 		{699D4849-4E9A-463F-97EB-D60FF211B03F}.ReleaseGPU|x64.ActiveCfg = Release|Any CPU
 		{699D4849-4E9A-463F-97EB-D60FF211B03F}.ReleaseGPU|x64.Build.0 = Release|Any CPU
+		{4E8D884E-7181-4035-8297-555494F3F5BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E8D884E-7181-4035-8297-555494F3F5BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E8D884E-7181-4035-8297-555494F3F5BC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4E8D884E-7181-4035-8297-555494F3F5BC}.Debug|x64.Build.0 = Debug|Any CPU
+		{4E8D884E-7181-4035-8297-555494F3F5BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E8D884E-7181-4035-8297-555494F3F5BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E8D884E-7181-4035-8297-555494F3F5BC}.Release|x64.ActiveCfg = Release|Any CPU
+		{4E8D884E-7181-4035-8297-555494F3F5BC}.Release|x64.Build.0 = Release|Any CPU
+		{4E8D884E-7181-4035-8297-555494F3F5BC}.ReleaseGPU|Any CPU.ActiveCfg = Release|Any CPU
+		{4E8D884E-7181-4035-8297-555494F3F5BC}.ReleaseGPU|Any CPU.Build.0 = Release|Any CPU
+		{4E8D884E-7181-4035-8297-555494F3F5BC}.ReleaseGPU|x64.ActiveCfg = Release|Any CPU
+		{4E8D884E-7181-4035-8297-555494F3F5BC}.ReleaseGPU|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
