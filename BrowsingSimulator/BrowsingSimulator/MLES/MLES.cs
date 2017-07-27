@@ -26,6 +26,7 @@ namespace BrowsingSimulator
         protected ConcurrentDictionary<int, Item[]> cache = new ConcurrentDictionary<int, Item[]>();
         protected string cacheFilename;
         protected int cachedArrayLength = 1000;
+        protected Random random = new Random(5334);
 
         public MLES(float[][] dataset, Tuple<int, int[]>[][] clusteringLayers, string cacheFilename = null)
         {
@@ -251,6 +252,105 @@ namespace BrowsingSimulator
                     return results.ToArray();
                 }
             }
+            return results.ToArray();
+        }
+
+
+        public Item[] SearchKnnHalfRandom(Item query, int nResults,
+            Func<int, bool> HasItemDroppedOut)
+        {
+            Item[] sortedLayer;
+
+            // load sorted array
+            if (cache.ContainsKey(query.Id))
+            {
+                sortedLayer = cache[query.Id];
+#if VERBOSE
+                Console.WriteLine("== CACHE HIT ==");
+#endif
+            }
+            else
+            {
+                float[] distances;
+#if GPU
+                if (set.Equals(Dataset))
+                {
+                    distances = ComputeDistancesDatasetGPU(query);
+                    //distances = ComputeDistancesDatasetCPU(query, Dataset);
+                }
+                else
+                {
+                    distances = ComputeDistancesDatasetCPU(query, set);
+                }
+#else
+                distances = ComputeDistancesDatasetCPU(query, Dataset);
+#endif
+                sortedLayer = (Item[])Dataset.Clone();
+                Array.Sort(distances, sortedLayer);
+
+                // cache the sorted array
+                try
+                {
+                    Item[] cachedArray = new Item[cachedArrayLength];
+                    Array.Copy(sortedLayer, cachedArray, cachedArray.Length);
+                    cache.TryAdd(query.Id, cachedArray);
+                }
+                catch (OutOfMemoryException ex)
+                {
+                    // better drop the cache than crash the simulation
+                    cache.Clear();
+                    Console.WriteLine("==== CACHE EMPTIED ====");
+                }
+            }
+
+            // filter dropped items
+            List<Item> results = new List<Item>();
+            List<Item> remainder = new List<Item>();
+            for(int i = 0; i < sortedLayer.Length; i++)
+            {
+                Item item = sortedLayer[i];
+                if (!HasItemDroppedOut(item.Id))
+                {
+                    results.Add(item);
+                }
+                else
+                {
+                    remainder.Add(item);
+                }
+
+#if VERBOSE
+                else
+                {
+                    Console.WriteLine("Item dropped from display: {0}", item.Id);
+                }
+#endif
+                if (results.Count == nResults / 2)
+                {
+                    for (int j = i + 1; j < sortedLayer.Length; j++)
+                    {
+                        remainder.Add(sortedLayer[j]);
+                    }
+                    break;
+                }
+            }
+
+
+
+            // add random from 1000 range
+            while (results.Count < nResults)
+            {
+                int randomId = random.Next(remainder.Count - 1);
+                Item randomItem = remainder[randomId];
+
+                if (results.Contains(randomItem))
+                {
+                    throw new NotImplementedException("this should have not happened!");
+                }
+
+                results.Add(randomItem);
+                remainder.RemoveAt(randomId);
+            }
+
             return results.ToArray();
         }
 

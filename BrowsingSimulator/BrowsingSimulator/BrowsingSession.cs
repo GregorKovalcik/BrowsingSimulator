@@ -76,7 +76,9 @@ namespace BrowsingSimulator
             //    // pan
             //    GenerateNewDisplayPan(query, LayerDepth, DisplaySize);
             //}
-            GenerateNewDisplay(query, LayerDepth, DisplaySize);
+            //GenerateNewDisplay(query, LayerDepth, DisplaySize);
+            //GenerateNewDisplayHalfRandom(query, LayerDepth, DisplaySize);
+            GenerateNewDisplayHalfRandomClosest(query, LayerDepth, DisplaySize);
 
             BrowsingDepth++;
 
@@ -126,6 +128,50 @@ namespace BrowsingSimulator
                 throw new NotImplementedException("Display was not filled completely!");
             }
             
+            IncrementDisplayedCount(displayItems);
+            Display = displayItems;
+        }
+
+
+        protected void GenerateNewDisplayHalfRandom(Item query, int layerId, int nResults)
+        {
+            Display.Clear();
+
+            List<Item> displayItems = new List<Item>();
+            Item[] halfResults = Mles.SearchKNN(query, layerId, nResults / 2, HasItemDroppedOut, displayItems);
+            List<Item> alreadyDisplayed = new List<Item>(halfResults);
+            displayItems.AddRange(halfResults);
+
+            while (alreadyDisplayed.Count < nResults)
+            {
+                Item randomItem = Mles.Dataset[random.Next(Mles.Dataset.Length)];
+
+                while (alreadyDisplayed.Contains(randomItem))
+                {
+                    randomItem = Mles.Dataset[random.Next(Mles.Dataset.Length)];
+                }
+
+                alreadyDisplayed.Add(randomItem);
+                displayItems.Add(randomItem);
+            }
+
+            IncrementDisplayedCount(displayItems);
+            Display = displayItems;
+        }
+
+
+
+        protected void GenerateNewDisplayHalfRandomClosest(Item query, int layerId, int nResults)
+        {
+            Display.Clear();
+
+            List<Item> displayItems = new List<Item>();
+            displayItems.AddRange(Mles.SearchKnnHalfRandom(query, nResults, HasItemDroppedOut));
+            if (displayItems.Count < nResults)
+            {
+                throw new NotImplementedException("Display was not filled completely!");
+            }
+
             IncrementDisplayedCount(displayItems);
             Display = displayItems;
         }
