@@ -33,7 +33,7 @@ namespace BrowsingSimulator
         {
             FillDataset(dataset, classMapping);
             
-            FillLayers(clusteringLayers);
+            FillLayers(clusteringLayers, classMapping);
             this.cacheFilename = cacheFilename;
             LoadCache();
         }
@@ -154,7 +154,7 @@ namespace BrowsingSimulator
             }
         }
 
-        protected void FillLayers(Tuple<int, int[]>[][] clusteringLayers)
+        protected void FillLayers(Tuple<int, int[]>[][] clusteringLayers, int[] classMapping)
         {
             Layers = new Item[clusteringLayers.Length + 1][];
             Layers[Layers.Length - 1] = Dataset;
@@ -192,7 +192,8 @@ namespace BrowsingSimulator
                     //    }
                     //}
                     //Layers[iLayer][iLayerCluster] = new Item(globalId, iLayerCluster, descriptor, clusterItems);
-                    Layers[iLayer][iLayerCluster] = new Item(globalId, iLayerCluster, descriptor, null);
+                    Layers[iLayer][iLayerCluster] = new Item(globalId, classMapping[globalId], iLayerCluster, 
+                        descriptor, null);
                     //foreach (Item item in clusterItems)
                     //{
                     //    item.SetParentItem(Layers[iLayer][iLayerCluster]);
