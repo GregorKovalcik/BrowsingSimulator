@@ -16,6 +16,8 @@ namespace BrowsingSimulator
     {
         public Item[] Dataset { get; protected set; }
         public Item[][] Layers { get; protected set; }
+        public Item[] ClassMeans { get; protected set; }
+
 #if GPU
         protected int gpuDatasetSize = 0;
         protected float[][] subDatasetGpu;
@@ -27,36 +29,45 @@ namespace BrowsingSimulator
         protected string cacheFilename;
         protected int cachedArrayLength = 1000;
 
-        public MLES(float[][] dataset, Tuple<int, int[]>[][] clusteringLayers, string cacheFilename = null)
+        public MLES(float[][] dataset, int[] classMapping, Tuple<int, int[]>[][] clusteringLayers, string cacheFilename = null)
         {
-            // TODO: check input data
-            FillDataset(dataset);
-
-#if TEST
-            for (int i = 0; i < clusteringLayers.Length - 1; i++)
-            {
-                TestLayerChildrenCount(clusteringLayers[i], clusteringLayers[i + 1].Length);
-            }
-            //TestLayerChildrenCount(clusteringLayers[1], dataset.Length);
-            //TestLayerChildrenCount(clusteringLayers[0], clusteringLayers[1].Length);
-#endif
-
+            FillDataset(dataset, classMapping);
+            
             FillLayers(clusteringLayers);
-#if TEST
-            for (int i = 0; i < clusteringLayers.Length; i++)
-            {
-                TestLayerParent(Layers[i], i);
-            }
-            //TestLayerParent(Layers[2], 2);
-            //TestLayerParent(Layers[1], 1);
-            //TestLayerParent(Layers[0], 0);
-#endif
-#if GPU
-            AllocateGpuMemory();
-#endif
             this.cacheFilename = cacheFilename;
             LoadCache();
         }
+
+//        public MLES(float[][] dataset, Tuple<int, int[]>[][] clusteringLayers, string cacheFilename = null)
+//        {
+//            // TODO: check input data
+//            FillDataset(dataset);
+
+//#if TEST
+//            for (int i = 0; i < clusteringLayers.Length - 1; i++)
+//            {
+//                TestLayerChildrenCount(clusteringLayers[i], clusteringLayers[i + 1].Length);
+//            }
+//            //TestLayerChildrenCount(clusteringLayers[1], dataset.Length);
+//            //TestLayerChildrenCount(clusteringLayers[0], clusteringLayers[1].Length);
+//#endif
+
+//            FillLayers(clusteringLayers);
+//#if TEST
+//            for (int i = 0; i < clusteringLayers.Length; i++)
+//            {
+//                TestLayerParent(Layers[i], i);
+//            }
+//            //TestLayerParent(Layers[2], 2);
+//            //TestLayerParent(Layers[1], 1);
+//            //TestLayerParent(Layers[0], 0);
+//#endif
+//#if GPU
+//            AllocateGpuMemory();
+//#endif
+//            this.cacheFilename = cacheFilename;
+//            LoadCache();
+//        }
 #if GPU
         protected void AllocateGpuMemory()
         {
@@ -80,12 +91,66 @@ namespace BrowsingSimulator
             launchParam = new LaunchParam((gpuDatasetSize / blockDim) + 1, blockDim);
         }
 #endif
-        protected void FillDataset(float[][] dataset)
+        //protected void FillDataset(float[][] dataset)
+        //{
+        //    Dataset = new Item[dataset.Length];
+        //    for (int i = 0; i < dataset.Length; i++)
+        //    {
+        //        Dataset[i] = new Item(i, -1, i, dataset[i], null);
+        //    }
+        //}
+
+        protected void FillDataset(float[][] dataset, int[] classMapping)
         {
             Dataset = new Item[dataset.Length];
             for (int i = 0; i < dataset.Length; i++)
             {
-                Dataset[i] = new Item(i, i, dataset[i], null);
+                Dataset[i] = new Item(i, classMapping[i], i, dataset[i], null);
+            }
+
+            GenerateClassMeans(classMapping);
+        }
+
+        protected void GenerateClassMeans(int[] classMapping)
+        {
+            // find the highest class ID
+            int maxClassId = -1;
+            for (int i = 0; i < classMapping.Length; i++)
+            {
+                if (classMapping[i] > maxClassId)
+                {
+                    maxClassId = classMapping[i];
+                }
+            }
+
+            // count class items and add descriptors
+            int classCount = maxClassId + 1;
+            int[] classCounts = new int[classCount];
+            float[][] classMeans = new float[classCount][];
+            for (int i = 0; i < Dataset.Length; i++)
+            {
+                Item item = Dataset[i];
+                classCounts[item.ClassId]++;
+
+                if (classMeans[item.ClassId] == null)
+                {
+                    // no descriptor, initialize by a clone
+                    classMeans[item.ClassId] = (float[])item.Descriptor.Clone();
+                }
+                else
+                {
+                    // has a descriptor, add (zip) them together
+                    classMeans[item.ClassId] = classMeans[item.ClassId].Zip(item.Descriptor, (x, y) => x + y).ToArray();
+                }
+            }
+
+            // divide by count to produce a mean
+            ClassMeans = new Item[classMeans.Length];
+            for (int i = 0; i < classMeans.Length; i++)
+            {
+                classMeans[i] = classMeans[i].Select(x => x / classCounts[i]).ToArray();
+                int classExampleId = Dataset.Where(d => d.ClassId == i).First().Id;
+                ClassMeans[i] = new Item(classExampleId, i, -1, classMeans[i], null);
             }
         }
 

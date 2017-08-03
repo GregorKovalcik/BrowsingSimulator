@@ -21,11 +21,63 @@ namespace BrowsingSimulator
             Mles = mles;
         }
 
-        public void RunSimulations(int[] randomDistinctIds, int displaySize, int zoomingStep, int browsingCoherence, 
+//        public void RunSimulations(int[] randomDistinctIds, int displaySize, int zoomingStep, int browsingCoherence, 
+//            float dropFactor = 1.0f, int maxBrowsingDepth = 20, int randomSeed = 5334)
+//        {
+//            BrowsingSessions = 
+//                GenerateBrowsingSessions(randomDistinctIds, displaySize, zoomingStep, browsingCoherence, dropFactor, randomSeed);
+
+//            Console.WriteLine("Running {0} sessions.", BrowsingSessions.Length);
+
+//#if PARALLEL
+//            Parallel.For(0, BrowsingSessions.Length, index =>
+//#else
+//            for (int index = 0; index < BrowsingSessions.Length; index++)
+//#endif
+//            {
+//                try
+//                {
+//                    BrowsingSession session = BrowsingSessions[index];
+//#if VERBOSE
+//                    Console.WriteLine("Launching session ID: {0}. Searched item is in {1} -> {2} -> {3}",
+//                        session.Id,
+//                        session.SearchedItem.ParentItem.ParentItem.LayerLocalId,
+//                        session.SearchedItem.ParentItem.LayerLocalId,
+//                        session.SearchedItem.LayerLocalId);
+//#endif
+//                    do
+//                    {
+//                        float itemDistance = session.SelectRandomItemAndGenerateNewDisplay();
+//#if VERBOSE
+//                        Console.WriteLine("Session ID: {0}, browsing depth: {1}, item distance: {2}",
+//                            session.Id, session.BrowsingDepth, itemDistance);
+//#endif
+//                    } while (session.BrowsingDepth < maxBrowsingDepth && !session.ItemFound);
+
+//                    Console.WriteLine("Session ID: {0}, item {1} after {2} iterations.",
+//                                session.Id.ToString("00000"),
+//                                session.ItemFound ? "**** FOUND ****" : "__ NOT FOUND __",
+//                                session.BrowsingDepth);
+                    
+//                }
+//                catch (Exception ex)
+//                {
+//                    Console.WriteLine(ex.Message);
+//                    Console.WriteLine(ex.StackTrace);
+//                    throw;
+//                }
+//            }
+//#if PARALLEL
+//            );
+//#endif
+//        }
+
+
+        public void RunClassSimulations(int displaySize, int zoomingStep, int browsingCoherence,
             float dropFactor = 1.0f, int maxBrowsingDepth = 20, int randomSeed = 5334)
         {
-            BrowsingSessions = 
-                GenerateBrowsingSessions(randomDistinctIds, displaySize, zoomingStep, browsingCoherence, dropFactor, randomSeed);
+            BrowsingSessions =
+                GenerateClassBrowsingSessions(displaySize, zoomingStep, browsingCoherence, dropFactor, randomSeed);
 
             Console.WriteLine("Running {0} sessions.", BrowsingSessions.Length);
 
@@ -47,18 +99,20 @@ namespace BrowsingSimulator
 #endif
                     do
                     {
-                        float itemDistance = session.SelectRandomItemAndGenerateNewDisplay();
+                        float itemDistance = session.SelectRandomItemAndGenerateNewDisplayClass();
 #if VERBOSE
                         Console.WriteLine("Session ID: {0}, browsing depth: {1}, item distance: {2}",
                             session.Id, session.BrowsingDepth, itemDistance);
 #endif
-                    } while (session.BrowsingDepth < maxBrowsingDepth && !session.ItemFound);
+                    //} while (session.BrowsingDepth < maxBrowsingDepth && !session.ItemFound);
+                    } while (session.BrowsingDepth < maxBrowsingDepth && !session.ClassFound);
 
                     Console.WriteLine("Session ID: {0}, item {1} after {2} iterations.",
                                 session.Id.ToString("00000"),
-                                session.ItemFound ? "**** FOUND ****" : "__ NOT FOUND __",
+                                //session.ItemFound ? "**** FOUND ****" : "__ NOT FOUND __",
+                                session.ClassFound ? "**** FOUND ****" : "__ NOT FOUND __",
                                 session.BrowsingDepth);
-                    
+
                 }
                 catch (Exception ex)
                 {
@@ -72,14 +126,30 @@ namespace BrowsingSimulator
 #endif
         }
 
-        protected BrowsingSession[] GenerateBrowsingSessions(int[] randomDistinctIds, 
-            int displaySize, int zoomingStep, int browsingCoherence, float dropFactor, int randomSeed)
+
+        //protected BrowsingSession[] GenerateBrowsingSessions(int[] randomDistinctIds, 
+        //    int displaySize, int zoomingStep, int browsingCoherence, float dropFactor, int randomSeed)
+        //{
+        //    BrowsingSession[] browsingSessions = new BrowsingSession[randomDistinctIds.Length];
+        //    Random random = new Random(randomSeed);
+        //    for (int i = 0; i < randomDistinctIds.Length; i++)
+        //    {
+        //        Item searchedItem = Mles.Dataset[randomDistinctIds[i]];
+        //        browsingSessions[i] = new BrowsingSession(i, displaySize, zoomingStep, browsingCoherence, dropFactor,
+        //            random.Next(), Mles, searchedItem);
+        //        browsingSessions[i].LoadZeroPageDisplay(Mles.Layers[0]);
+        //    }
+        //    return browsingSessions;
+        //}
+
+
+        protected BrowsingSession[] GenerateClassBrowsingSessions(int displaySize, int zoomingStep, int browsingCoherence, float dropFactor, int randomSeed)
         {
-            BrowsingSession[] browsingSessions = new BrowsingSession[randomDistinctIds.Length];
+            BrowsingSession[] browsingSessions = new BrowsingSession[Mles.ClassMeans.Length];
             Random random = new Random(randomSeed);
-            for (int i = 0; i < randomDistinctIds.Length; i++)
+            for (int i = 0; i < browsingSessions.Length; i++)
             {
-                Item searchedItem = Mles.Dataset[randomDistinctIds[i]];
+                Item searchedItem = Mles.ClassMeans[i];
                 browsingSessions[i] = new BrowsingSession(i, displaySize, zoomingStep, browsingCoherence, dropFactor,
                     random.Next(), Mles, searchedItem);
                 browsingSessions[i].LoadZeroPageDisplay(Mles.Layers[0]);
@@ -87,7 +157,7 @@ namespace BrowsingSimulator
             return browsingSessions;
         }
 
-        
+
         public void SaveSessionLogs(string outputDirectory)
         {
             Directory.CreateDirectory(outputDirectory);
@@ -195,7 +265,8 @@ namespace BrowsingSimulator
             {
                 if (session.BrowsingDepth == histogram.Length)
                 {
-                    if (session.ItemFound)
+                    //if (session.ItemFound)
+                    if (session.ClassFound)
                     {
                         histogram[session.BrowsingDepth - 1]++;
                     }
@@ -205,7 +276,8 @@ namespace BrowsingSimulator
                     histogram[session.BrowsingDepth - 1]++;
                 }
 
-                if (session.ItemFound)
+                //if (session.ItemFound)
+                if (session.ClassFound)
                 {
                     itemFoundCount++;
                 }

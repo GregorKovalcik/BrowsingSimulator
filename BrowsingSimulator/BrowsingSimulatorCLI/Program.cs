@@ -18,7 +18,8 @@ namespace BrowsingSimulatorCLI
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
 
             string descriptorFile = args[0];
-            string queryIdsFile = args[1];
+            //string queryIdsFile = args[1];
+            string classMappingFile = args[1];
             int[] zoomingSteps = ParseIntArray(args[2]);
             int[] browsingCoherences = ParseIntArray(args[3]);
             float[] dropFactors = ParseFloatArray(args[4]);
@@ -35,20 +36,22 @@ namespace BrowsingSimulatorCLI
 
 
             float[][] descriptors = LoadDescriptorFile(descriptorFile);
-            //Tuple<int, int[]>[][] clustering = Load3LayerClusteringFiles(clusteringFileL0, clusteringFileL1);
+
+            int[] classMapping = LoadClassMapping(classMappingFile);
 
             Tuple<int, int[]>[][] clustering = LoadMlesLayers(mlesLayers);
 
 
-            int[] queryIds = LoadQueryIds(queryIdsFile);
-            MLES mles = new MLES(descriptors, clustering, cacheFilename);
+            //int[] queryIds = LoadQueryIds(queryIdsFile);
+            MLES mles = new MLES(descriptors, classMapping, clustering, cacheFilename);
             BrowsingSimulatorEngine simulator = new BrowsingSimulatorEngine(mles);
 
             for (int iZoom = 0; iZoom < zoomingSteps.Length; iZoom++)
                 for (int iCoherence = 0; iCoherence < browsingCoherences.Length; iCoherence++)
                     for (int iDrop = 0; iDrop < dropFactors.Length; iDrop++)
                     {
-                        simulator.RunSimulations(queryIds, simulator.Mles.Layers[0].Length, 
+                        //simulator.RunSimulations(queryIds, simulator.Mles.Layers[0].Length, 
+                        simulator.RunClassSimulations(simulator.Mles.Layers[0].Length,
                             zoomingSteps[iZoom], browsingCoherences[iCoherence], dropFactors[iDrop]);
 
                         string directory = "zoom" + zoomingSteps[iZoom]
@@ -63,6 +66,22 @@ namespace BrowsingSimulatorCLI
             //simulator.RunSimulations(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 24, 1, 1);
             mles.Dispose();
         }
+
+        private static int[] LoadClassMapping(string classMappingFile)
+        {
+            List<int> result = new List<int>();
+            using (StreamReader reader = new StreamReader(classMappingFile))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    result.Add(int.Parse(line));
+                }
+            }
+
+            return result.ToArray();
+        }
+
 
         private static float[][] LoadDescriptorFile(string descriptorFile)
         {

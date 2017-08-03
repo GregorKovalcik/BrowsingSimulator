@@ -9,6 +9,8 @@ namespace BrowsingSimulator
     public class Item
     {
         public int Id { get; protected set; }
+        public int ClassId { get; protected set; }
+        
         public int LayerLocalId { get; protected set; }
         public float[] Descriptor { get; protected set; }
         public Item ParentItem { get; protected set; }
@@ -22,6 +24,17 @@ namespace BrowsingSimulator
             ClusterItems = clusterItems;
             ParentItem = null;
         }
+
+        public Item(int id, int classId, int layerLocalId, float[] descriptor, Item[] clusterItems)
+        {
+            Id = id;
+            ClassId = classId;
+            LayerLocalId = layerLocalId;
+            Descriptor = descriptor;
+            ClusterItems = clusterItems;
+            ParentItem = null;
+        }
+        
 
         public void SetParentItem(Item parentItem)
         {
