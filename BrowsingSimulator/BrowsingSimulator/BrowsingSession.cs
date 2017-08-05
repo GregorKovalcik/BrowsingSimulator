@@ -26,6 +26,8 @@ namespace BrowsingSimulator
         private Random random;
 
         public bool ItemFound { get; protected set; }
+        
+        public List<int> AlreadySelectedItems { get; protected set; }
 
         public BrowsingSession(int id, int displaySize, int zoomingStep, int browsingCoherence, float dropFactor, int randomSeed, MLES mles,
             Item searchedItem)
@@ -45,6 +47,7 @@ namespace BrowsingSimulator
             BrowsingDepth = 0;
             Logs = new LinkedList<BrowsingLog>();
             ItemFound = false;
+            AlreadySelectedItems = new List<int>();
         }
 
         public void LoadZeroPageDisplay(IEnumerable<Item> zeroPageItems)
@@ -57,25 +60,21 @@ namespace BrowsingSimulator
         public float SelectRandomItemAndGenerateNewDisplay()
         {
             Item query = SelectRandomItem();
+            AlreadySelectedItems.Add(query.Id);
 #if VERBOSE
             Console.WriteLine("Layer {0}, selected {1}, drop probability: {2}", 
                 LayerDepth, query.LayerLocalId, DropProbability(query.Id));
 #endif
             float searchedItemDistance = Item.GetDistanceSQR(query.Descriptor, SearchedItem.Descriptor);
-            Logs.AddLast(new BrowsingLog(Logs.Count, Display.ToArray(), query, DropProbability(query.Id), searchedItemDistance, LayerDepth, BrowsingDepth));
+            Logs.AddLast(new BrowsingLog(Logs.Count, Display.ToArray(), query,
+                DropProbability(query.Id), searchedItemDistance, LayerDepth, BrowsingDepth));
 
             // zoom vs pan
             if ((LayerDepth < Mles.Layers.Length - 1) && (CurrentZoomingStep++) % ZoomingStep == 0)
             {
                 // zoom
                 LayerDepth++;
-                //GenerateNewDisplayZoom(query, LayerDepth, DisplaySize);
             }
-            //else
-            //{
-            //    // pan
-            //    GenerateNewDisplayPan(query, LayerDepth, DisplaySize);
-            //}
             GenerateNewDisplay(query, LayerDepth, DisplaySize);
 
             BrowsingDepth++;
@@ -104,7 +103,8 @@ namespace BrowsingSimulator
 
         protected Item SelectRandomItem()
         {
-            Item[] nearestItems = Mles.SearchKNN(SearchedItem, Display.ToArray(), BrowsingCoherence, item => false);
+            Item[] nearestItems = Mles.SearchKNN(SearchedItem, Display.ToArray(), BrowsingCoherence,
+                item => false, AlreadySelectedItems);, , 
             if (nearestItems.Length == 1)
             {
                 return nearestItems[0];
@@ -120,7 +120,7 @@ namespace BrowsingSimulator
             Display.Clear();
 
             List<Item> displayItems = new List<Item>();
-            displayItems.AddRange(Mles.SearchKNN(query, layerId, nResults, HasItemDroppedOut, displayItems));
+            displayItems.AddRange(Mles.SearchKNN(query, layerId, nResults, HasItemDroppedOut));
             if (displayItems.Count < nResults)
             {
                 throw new NotImplementedException("Display was not filled completely!");
@@ -171,22 +171,22 @@ namespace BrowsingSimulator
         }
 
 
-        protected void LoopAddLayerItems(Item query, int layerId, int nResults, List<Item> displayItems)
-        {
-            int loopWatchdog = 0;
-            while (displayItems.Count < nResults)
-            {
-                // not enough items in zoomed cluster, add additional files from outside the cluster but from the same layer
-                int nAdditionalResults = nResults - displayItems.Count;
-                Item[] additionalItems = Mles.SearchKNN(query, layerId, nAdditionalResults, HasItemDroppedOut, displayItems);
-                displayItems.AddRange(additionalItems);
+        //protected void LoopAddLayerItems(Item query, int layerId, int nResults, List<Item> displayItems)
+        //{
+        //    int loopWatchdog = 0;
+        //    while (displayItems.Count < nResults)
+        //    {
+        //        // not enough items in zoomed cluster, add additional files from outside the cluster but from the same layer
+        //        int nAdditionalResults = nResults - displayItems.Count;
+        //        Item[] additionalItems = Mles.SearchKNN(query, layerId, nAdditionalResults, HasItemDroppedOut, displayItems);
+        //        displayItems.AddRange(additionalItems);
 
-                if (loopWatchdog++ > 10)
-                {
-                    throw new NotImplementedException("Trouble filling whole display...");
-                }
-            }
-        }
+        //        if (loopWatchdog++ > 10)
+        //        {
+        //            throw new NotImplementedException("Trouble filling whole display...");
+        //        }
+        //    }
+        //}
 
 
         protected bool HasItemDroppedOut(int id)

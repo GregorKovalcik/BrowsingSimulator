@@ -169,21 +169,21 @@ namespace BrowsingSimulator
         public Item[] SearchKNN(Item query, int layerId, int nResults, Func<int, bool> HasItemDroppedOut)
         {
             Item[] layer = Layers[layerId];
-            return SearchKNN(query, layer, nResults, HasItemDroppedOut, new Item[0]);
+            return SearchKNN(query, layer, nResults, HasItemDroppedOut, new List<int>());
         }
         public Item[] SearchKNN(Item query, Item[] set, int nResults, Func<int, bool> HasItemDroppedOut)
         {
-            return SearchKNN(query, set, nResults, HasItemDroppedOut, new Item[0]);
+            return SearchKNN(query, set, nResults, HasItemDroppedOut, new List<int>());
         }
         public Item[] SearchKNN(Item query, int layerId, int nResults, 
-            Func<int, bool> HasItemDroppedOut, ICollection<Item> alreadyUsedItems)
+            Func<int, bool> HasItemDroppedOut, List<int> alreadyUsedItems)
         {
             Item[] layer = Layers[layerId];
             return SearchKNN(query, layer, nResults, HasItemDroppedOut, alreadyUsedItems);
         }
 
         public Item[] SearchKNN(Item query, Item[] set, int nResults, 
-            Func<int, bool> HasItemDroppedOut, ICollection<Item> alreadyUsedItems)
+            Func<int, bool> HasItemDroppedOut, List<int> alreadyUsedItems)
         {
             Item[] sortedLayer;
 
@@ -236,7 +236,7 @@ namespace BrowsingSimulator
             List<Item> results = new List<Item>();
             foreach (Item item in sortedLayer)
             {
-                if (!HasItemDroppedOut(item.Id) && !alreadyUsedItems.Contains(item))
+                if (!HasItemDroppedOut(item.Id) && !alreadyUsedItems.Contains(item.Id))
                 {
                     results.Add(item);
                 }
