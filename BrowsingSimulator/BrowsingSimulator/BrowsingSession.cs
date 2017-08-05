@@ -104,7 +104,7 @@ namespace BrowsingSimulator
         protected Item SelectRandomItem()
         {
             Item[] nearestItems = Mles.SearchKNN(SearchedItem, Display.ToArray(), BrowsingCoherence,
-                item => false, AlreadySelectedItems);, , 
+                item => false, AlreadySelectedItems); 
             if (nearestItems.Length == 1)
             {
                 return nearestItems[0];
